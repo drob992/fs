@@ -129,33 +129,14 @@ class LiveCollector(QWebPage):
 
 		if self.checker:
 
-			self.resourse_checker = QTimer()
-			self.resourse_checker.timeout.connect(self.resourse_check)
-			self.resourse_checker.start(10000)
+			# self.resourse_checker = QTimer()
+			# self.resourse_checker.timeout.connect(self.resourse_check)
+			# self.resourse_checker.start(10000)
 
-
-			QTimer().singleShot(2000, self.parse_countries)
+			QTimer().singleShot(2000, self.open_countries)
 			self.checker = False
-		# print(country_list.toPlainText().strip().lower())
-		# print(country_list1.toPlainText().strip().lower())
-		# self.collector_timer = QTimer()
-		# self.sidebar_parser_timer = QTimer()
-		#
-		# self.open_sport = QTimer()
-		# self.open_sport.timeout.connect(self.open_sport_group)
-		# self.open_sport.start(5000)
-		#
-		# self.event_watcher_timer = QTimer()
-		# self.event_watcher_timer.timeout.connect(self.event_watcher)
-		#
-		#
-		#`
-		# # Potrebno zato sto na tipbet-u posle 5 minuta prozor postaje ne aktivan
-		# self.collector_reloader = QTimer()
-		# self.collector_reloader.timeout.connect(self.reload_collector)
-		# self.collector_reloader.start(290000)
 
-	def parse_countries(self):
+	def open_countries(self):
 
 		print("1111111111111111111111")
 		main = self._frame.findFirstElement("#main")
@@ -180,10 +161,12 @@ class LiveCollector(QWebPage):
 				# print(country1.toPlainText().strip())
 				# print("----------------------------")
 
-		QTimer().singleShot(2000, self.parse_leagues_list)
+		QTimer().singleShot(2000, self.get_league_links)
+
+		print("11111111111!!!!!!!!!!!!!!!!!!!")
 
 
-	def parse_leagues_list(self):
+	def get_league_links(self):
 
 		print("22222222222222222")
 		main = self._frame.findFirstElement("#main")
@@ -192,12 +175,17 @@ class LiveCollector(QWebPage):
 
 		for i in range(1, len(country_list)):
 			if country_list.at(i).hasAttribute("id"):
+				if country_list.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
+					continue
 				# print(country_list.at(i).attribute("id"))
 				league_list = country_list.at(i).findAll("ul").at(0).findAll("li")
 				for x in range(0, len(league_list)):
 					league = league_list.at(x).findAll("a").at(0)
 
-					if league not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
+					if league.toPlainText().strip() in ["Championship", "Ligue 1"]:
+						print(league.toPlainText().strip())
+						print("111111111111111111111111111111111111111111111111")
+					# if league not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
 						# print(league.attribute("href"))
 						self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
 						self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
@@ -207,12 +195,17 @@ class LiveCollector(QWebPage):
 
 		for i in range(0, len(country_list1)):
 			if country_list1.at(i).hasAttribute("id"):
+				if country_list.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
+					continue
 				# print(country_list1.at(i).attribute("id"))
 				league_list = country_list1.at(i).findAll("ul").at(0).findAll("li")
 				for x in range(0, len(league_list)):
 					league = league_list.at(x).findAll("a").at(0)
 
-					if league not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
+					if league.toPlainText().strip() in ["Championship", "Ligue 1"]:
+						print(league.toPlainText().strip())
+						print("11111111111111111111111111111111111111111111111111")
+					# if league not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
 						# print(league.attribute("href"))
 						self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
 						self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
@@ -220,8 +213,8 @@ class LiveCollector(QWebPage):
 						# print(league.toPlainText().strip())
 						# print("----------------------------")
 
-		self.redis.sadd('leagues_links', "https://www.flashscore.com/football/world/world-cup/")
-		self.redis.sadd('leagues', "world-cup")
+		# self.redis.sadd('leagues_links', "https://www.flashscore.com/football/world/world-cup/")
+		# self.redis.sadd('leagues', "world-cup")
 
 		print("222222222!!!!!!!!!!!!!!!!!!")
 		QTimer().singleShot(3000, self.parse_leagues_links)
@@ -233,25 +226,26 @@ class LiveCollector(QWebPage):
 
 		league_links = self.redis.smembers('leagues_links')
 
-		if len(league_links) == 0:
+		if self.redis.get("parse_teams"):
 
 			team_links = self.redis.smembers('team_links')
 
 			if len(team_links) == 0:
 				sys.exit()
 
+			# OPEN TEAM LINK
 			for link in team_links:
 				# print(link)
 				self.redis.srem("team_links", link)
 				print(link+"results")
 				if link != "https://www.flashscore.com":
 					self._frame.load(QNetworkRequest(QUrl(link+"results")))
-
 					self.more = True
-					QTimer().singleShot(3500, self.open_team)
-
+					QTimer().singleShot(3500, self.parse_team)
 					break
 
+		if len(league_links) == 1:
+			self.redis.set("parse_teams", True)
 
 		for link in league_links:
 			# print(link)
@@ -262,104 +256,192 @@ class LiveCollector(QWebPage):
 			print(link)
 			self._frame.load(QNetworkRequest(QUrl(link)))
 
-			QTimer().singleShot(3500, self.parse_league_teams)
+			QTimer().singleShot(3500, self.get_teams_links)
 
 			break
 
 			# break
 		print("333333333333!!!!!!!!!!!!!!!!!!")
 
-	def parse_league_teams(self):
+	def get_teams_links(self):
 		print("44444444444444444444444444")
 
-		groups = 0
+		groups = None
 		teams = 0
+		league_name = None
+		country = None
 		try:
-			main = self._frame.findFirstElement(".stats-table-container")
-
-			groups = main.findAll("tbody")
+			main = self._frame.findFirstElement("#main")
+			groups = main.findAll(".stats-table-container").at(0).findAll("tbody")
+			country = main.findAll(".tournament").at(0).findAll("a").at(1).toPlainText().strip()
+			league_name = main.findAll('.tournament-name').at(0).toPlainText().strip()
 		except:
-			print("EXCEPT BRE")
+			print("EXCEPT BRE 444444444")
 
-
+		print(country, league_name)
 		for i in range(len(groups)):
 			teams = groups.at(i).findAll("tr")
 			for x in range(len(teams)):
 				team = teams.at(x).findAll("td").at(1).findAll("span").at(1).findAll("a").at(0)
+				played = teams.at(x).findAll("td").at(2).toPlainText().strip()
+				wins = teams.at(x).findAll("td").at(3).toPlainText().strip()
+				draws = teams.at(x).findAll("td").at(4).toPlainText().strip()
+				losses = teams.at(x).findAll("td").at(5).toPlainText().strip()
+				goals = teams.at(x).findAll("td").at(6).toPlainText().strip()
+				points = teams.at(x).findAll("td").at(7).toPlainText().strip()
+
 				link_for_team = team.attribute("onclick").replace("javascript:getUrlByWinType('", "").replace("');", "")
 				self.redis.sadd("team_links", "https://www.flashscore.com{}".format(link_for_team))
 				self.redis.sadd("team_names", team)
-				print(team.toPlainText())
+				print(team.toPlainText(), played, wins, draws, losses, goals, points)
 				# print("11111111111111111111")
 
 		print("44444444444!!!!!!!!!!!!!!!!!!")
 		QTimer().singleShot(1500, self.parse_leagues_links)
 
 
-	def open_team(self):
+	def parse_team(self):
 		print("555555555555555555")
 
 		tr = None
 		team_name = None
 
-		if self.more:
-			print("5555555555@@@@@@@@@@@@@@@@@@@")
-			self.more = False
-			try:
-				load_more = self._frame.findFirstElement("#participant-page-results-more")
-				util.simulate_click(load_more.findAll("a").at(0))
-				print("5555555555###################################################")
-				QTimer().singleShot(3500, self.open_team)
-			except:
-				print("EXCEPT BRE open_team11")
-				QTimer().singleShot(1000, self.open_team)
+		# if self.more:
+		# 	print("5555555555@@@@@@@@@@@@@@@@@@@")
+		# 	self.more = False
+		# 	try:
+		# 		load_more = self._frame.findFirstElement("#participant-page-results-more")
+		# 		util.simulate_click(load_more.findAll("a").at(0))
+		# 		print("5555555555###################################################")
+		# 		QTimer().singleShot(3500, self.parse_team)
+		# 	except:
+		# 		print("EXCEPT BRE open_team11")
+		# 		QTimer().singleShot(1000, self.parse_team)
+		#
+		# else:
+		print("5555555555&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 
-		else:
-			print("5555555555&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-			try:
-				main = self._frame.findFirstElement("#main")
-				tr = main.findAll("#fs-results").at(0).findAll("tr")
-				team_name = main.findAll('.team-name').at(0).toPlainText().strip()
-			except:
-				print("EXCEPT BRE open_team22")
+		main = self._frame.findFirstElement("#main")
+		try:
+			country = main.findAll(".tournament").at(0).findAll("a").at(1).toPlainText().strip()
+		except:
+			print("Pukloeeeeee")
+
+		try:
+			tr = main.findAll("#fs-results").at(0).findAll("tr")
+			team_name = main.findAll('.team-name').at(0).toPlainText().strip()
+		except:
+			print("EXCEPT BRE open_team22")
 
 
-			country_part = None
-			tournament_part = None
-			time = None
-			team_home = None
-			team_away = None
-			score = None
-			win_lose = None
+		country_part = None
+		tournament_part = None
+		time = None
+		team_home = None
+		team_away = None
+		score = None
+		win_lose = None
 
-			print("55555555555555(((((((((((((((((((((((((")
-			for x in range(len(tr)):
+		print("55555555555555(((((((((((((((((((((((((")
+		for x in range(len(tr)):
 
-				row = tr.at(x)
+			row = tr.at(x)
 
-				if row.hasClass("league"):
-					country_part = row.findAll(".country_part").at(0).toPlainText().strip()
-					tournament_part = row.findAll(".tournament_part").at(0).toPlainText().strip()
-				else:
-					id = row.attribute("id").replace("g_1_", "")
-					time = row.findAll(".time").at(0).toPlainText().strip()
-					team_home = row.findAll(".team-home").at(0).toPlainText().strip()
-					team_away = row.findAll(".team-away").at(0).toPlainText().strip()
-					score = row.findAll(".score").at(0).toPlainText().strip().replace("\n", " ")
-					win_lose = row.findAll(".win_lose_icon").at(0).attribute("title").strip()
+			if row.hasClass("league"):
+				country_part = row.findAll(".country_part").at(0).toPlainText().strip()
+				tournament_part = row.findAll(".tournament_part").at(0).toPlainText().strip()
+			else:
+				id = row.attribute("id").replace("g_1_", "")
+				time = row.findAll(".time").at(0).toPlainText().strip()
+				team_home = row.findAll(".team-home").at(0).toPlainText().strip()
+				team_away = row.findAll(".team-away").at(0).toPlainText().strip()
+				score = row.findAll(".score").at(0).toPlainText().strip().replace("\n", " ")
+				win_lose = row.findAll(".win_lose_icon").at(0).attribute("title").strip()
 
-					if team_name != None:
-
+				if team_name != None:
+					if "2016" not in time and "2015" not in time and "2014" not in time and "2013" not in time and "2012" not in time and "2011" not in time and "2010" not in time and "2009" not in time:
 						event = time, " - ", team_home, " - ", team_away, " - ", score, " - ", win_lose, " - ", country_part, tournament_part, " - ", id
 						self.redis.hset(team_name, x, event)
 
 						print(country_part, tournament_part)
 						print(time, " - ", team_home, " - ", team_away, " - ", score, " - ", win_lose, " - ", id)
 
-			print("555555555555555!!!!!!!!!!!!!!!!!!")
+		print("555555555555555!!!!!!!!!!!!!!!!!!")
+		self.resourse_check()
+		QTimer().singleShot(3000, self.parse_leagues_links)
+		print("@!#!!@#!@$!@#!@#!@$!@$!$!#$")
 
-			QTimer().singleShot(3000, self.parse_leagues_links)
-			print("@!#!!@#!@$!@#!@#!@$!@$!$!#$")
+
+	def parse_statistics(self):
+		summary = {}
+		statistics = {}
+
+		try:
+
+			summary = self._frame.findFirstElement("#summary-content")
+			rows = summary.findAll("tr")
+
+			self.period = None
+			for i in range(len(rows)):
+				self.team1 = None
+				self.score = None
+				col = rows.at(i).findAll('td')
+				if len(col) == 1:
+					self.period = col.at(0).toPlainText().strip()
+				if len(col) == 3:
+					self.team1 = col.at(0).toPlainText().strip()
+					self.score = col.at(1).toPlainText().strip()
+				if len(col) == 2:
+					self.team1 = col.at(0).toPlainText().strip()
+
+				if self.team1 not in [" ", "", None]:
+					summary[self.period] = {"team1": self.team1}
+				if self.score:
+					summary[self.period] = {"score": self.score}
+
+			self.period = None
+			for i in range(len(rows)):
+				self.team2 = None
+				self.score = None
+				col = rows.at(i).findAll('td')
+				if len(col) == 1:
+					self.period = col.at(0).toPlainText().strip()
+				if len(col) == 3:
+					self.team2 = col.at(2).toPlainText().strip()
+					self.score = col.at(1).toPlainText().strip()
+				if len(col) == 2:
+					self.team2 = col.at(1).toPlainText().strip()
+
+				if self.team2 not in [" ", "", None]:
+					summary[self.period] = {"team1": self.team2}
+				if self.score:
+					summary[self.period] = {"score": self.score}
+
+		except Exception as e:
+			print("Puklo na SUMMARY")
+
+		try:
+			statistic = self._frame.findFirstElement("#tab-statistics-0-statistic")
+			rows = statistic.findAll('tr')
+
+			for i in range(len(rows)):
+				stats_name = rows.at(i).findAll('td').at(1).toPlainText().strip()
+				stats_team1 = rows.at(i).findAll('td').at(0).toPlainText().strip()
+				stats_team2 = rows.at(i).findAll('td').at(2).toPlainText().strip()
+
+				statistics[stats_name] = {'team1': stats_team1, 'team2': stats_team2}
+
+		except Exception as e:
+			print("Puklo na STATISTICS")
+
+		print("0000000000000000000000000")
+		print(summary)
+		print()
+		print()
+		print(statistics)
+		print("0000000000000000000000000")
+		#dodaj statistiku u redis
+
 
 	def resourse_check(self):
 
@@ -384,7 +466,7 @@ class LiveCollector(QWebPage):
 				continue
 
 	#################333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333
-	# def parse_league_teams(self):
+	# def get_teams_links(self):
 	# 	print("44444444444444444444444444")
 	#
 	# 	teams = 0
@@ -407,6 +489,29 @@ class LiveCollector(QWebPage):
 	# 	print("44444444444!!!!!!!!!!!!!!!!!!")
 	# 	QTimer().singleShot(1500, self.parse_leagues_links)
 	############################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
