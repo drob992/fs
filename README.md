@@ -1,2 +1,2 @@
-# tipbet-parser
+# flashscore-parser
 python 
