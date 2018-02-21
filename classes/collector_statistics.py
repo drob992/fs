@@ -129,11 +129,11 @@ class LiveCollector(QWebPage):
 
 		if self.checker:
 
-			self.statistics = QTimer()
-			self.statistics.timeout.connect(self.match_statistics)
-			self.statistics.start(10000)
+			# self.statistics = QTimer()
+			# self.statistics.timeout.connect(self.match_statistics)
+			# self.statistics.start(10000)
 
-			QTimer().singleShot(2000, self.open_countries)
+			QTimer().singleShot(2000, self.match_statistics)
 			self.checker = False
 
 	def open_countries(self):
@@ -178,52 +178,42 @@ class LiveCollector(QWebPage):
 				if country_list.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
 					continue
 				# print(country_list.at(i).attribute("id"))
+				league_list = country_list.at(i).findAll("ul").at(0).findAll("li")
+				for x in range(0, len(league_list)):
+					league = league_list.at(x).findAll("a").at(0)
 
-				country = country_list.at(i).findAll("a").at(0)
-				# print(country.toPlainText().strip())
-				# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
-				if country.toPlainText().strip() in ["England"]:
-
-					league_list = country_list.at(i).findAll("ul").at(0).findAll("li")
-					for x in range(0, len(league_list)):
-						league = league_list.at(x).findAll("a").at(0)
-
-						if league.toPlainText().strip() in ["Premier League"]:
-							print(league.toPlainText().strip())
-							print("111111111111111111111111111111111111111111111111")
-							# print(league.attribute("href"))
-							self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
-							self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
-							# util.simulate_click(league)
-							# print(league.toPlainText().strip())
-							# print("----------------------------")
-
-		print("qeweqweqweqweqeqweqweqwe")
+					# if league.toPlainText().strip() in ["Championship", "Ligue 1"]:
+					if league.toPlainText().strip() in ["Championship"]:
+						print(league.toPlainText().strip())
+						print("111111111111111111111111111111111111111111111111")
+					# if league not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
+						# print(league.attribute("href"))
+						self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
+						self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
+						# util.simulate_click(league)
+						# print(league.toPlainText().strip())
+						# print("----------------------------")
 
 		for i in range(0, len(country_list1)):
 			if country_list1.at(i).hasAttribute("id"):
-				if country_list1.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
+				if country_list.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
 					continue
 				# print(country_list1.at(i).attribute("id"))
+				league_list = country_list1.at(i).findAll("ul").at(0).findAll("li")
+				for x in range(0, len(league_list)):
+					league = league_list.at(x).findAll("a").at(0)
 
-				country = country_list1.at(i).findAll("a").at(0)
-				# print(country.toPlainText().strip())
-				# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
-				if country.toPlainText().strip() in ["England"]:
-
-					league_list = country_list1.at(i).findAll("ul").at(0).findAll("li")
-					for x in range(0, len(league_list)):
-						league = league_list.at(x).findAll("a").at(0)
-
-						if league.toPlainText().strip() in ["Premier League"]:
-							print(league.toPlainText().strip())
-							print("11111111111111111111111111111111111111111111111111")
-							# print(league.attribute("href"))
-							self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
-							self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
-							# util.simulate_click(league)
-							# print(league.toPlainText().strip())
-							# print("----------------------------")
+					# if league.toPlainText().strip() in ["Championship", "Ligue 1"]:
+					if league.toPlainText().strip() in ["Championship"]:
+						print(league.toPlainText().strip())
+						print("11111111111111111111111111111111111111111111111111")
+					# if league not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
+						# print(league.attribute("href"))
+						self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
+						self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
+						# util.simulate_click(league)
+						# print(league.toPlainText().strip())
+						# print("----------------------------")
 
 		# self.redis.sadd('leagues_links', "https://www.flashscore.com/football/world/world-cup/")
 		# self.redis.sadd('leagues', "world-cup")
@@ -243,27 +233,24 @@ class LiveCollector(QWebPage):
 			team_links = self.redis.smembers('team_links')
 
 			if len(team_links) == 0:
-				self.match_statistics()
 				sys.exit()
 
 			# OPEN TEAM LINK
 			for link in team_links:
-				print(link)
+				# print(link)
 				self.redis.srem("team_links", link)
 				print(link+"results")
 				if link != "https://www.flashscore.com":
 					self._frame.load(QNetworkRequest(QUrl(link+"results")))
 					self.more = True
 					QTimer().singleShot(3500, self.parse_team)
-				else:
-					QTimer().singleShot(3500, self.parse_leagues_links)
-				break
+					break
 		else:
 			if len(league_links) == 1:
 				self.redis.set("parse_teams", True)
 
 			for link in league_links:
-				print(link)
+				# print(link)
 				self.redis.srem("leagues_links", link)
 				if "cup" in link.lower() or "offs" in link.lower():
 					continue
@@ -351,8 +338,8 @@ class LiveCollector(QWebPage):
 		country_part = None
 		tournament_part = None
 		time = None
-		home = None
-		away = None
+		team_home = None
+		team_away = None
 		score = None
 		win_lose = None
 
@@ -380,7 +367,7 @@ class LiveCollector(QWebPage):
 						self.redis.hset(team_name, x, json.dumps(event))
 
 						print(country_part, tournament_part)
-						print(time, " - ", home, " - ", away, " - ", score, " - ", win_lose, " - ", id)
+						print(time, " - ", team_home, " - ", team_away, " - ", score, " - ", win_lose, " - ", id)
 
 		print("555555555555555!!!!!!!!!!!!!!!!!!")
 
@@ -391,114 +378,149 @@ class LiveCollector(QWebPage):
 
 	def match_statistics(self):
 
+		# self.statistics.stop()
 
 		team_names = self.redis.smembers("team_names")
-		print("POKUSAO SAM")
+
 		for team in team_names:
 
-			# self.statistics.stop()
 			matches = self.redis.hgetall(team)
-			print("STVARNO")
-			if matches:
 
-				cmd = 'python3 {}classes/collector_statistics.py Soccer'.format(project_root_path)  #
-				allready_running = None
-				pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
-				print("MAJKE MI")
-				for pid in pids:
-					try:
-						tst = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()
+			if len(matches) == 0 or team in ["", " ", None]:
+				self.redis.srem("team_names", team)
+				continue
 
-						for filename in ["collector_statistics.py"]:
-							if filename in str(tst):
-								allready_running = True
+			for i in matches:
 
-					except IOError:  # proc has already terminated
-						continue
+				match = json.loads(matches[i])
 
-				print(allready_running)
-				print("JEL RADI")
-				if not allready_running:
-					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+				print("https://www.flashscore.com/match/{}/#match-summary".format(match['flashscore_id']))
+				self._frame.load(QNetworkRequest(QUrl("https://www.flashscore.com/match/{}/#match-summary".format(match['flashscore_id']))))
 
+				self.summary_click = True
+				self.redis.hdel(team, i)
+				QTimer().singleShot(3000, self.parse_statistics)
+
+				break
 			break
 
 
 	def parse_statistics(self):
 		summary = {}
 		statistics = {}
+		if self.summary_click:
+			try:
+				summary_btn = self._frame.findFirstElement("#a-match-statistics")
+				util.simulate_click(summary_btn)
+				self.summary_click = False
+				QTimer().singleShot(2000, self.parse_statistics)
+				print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+			except Exception as e:
+				self.summary_click = False
+				QTimer().singleShot(2000, self.parse_statistics)
+				print("puklo na klik statistics", e)
+		else:
+			try:
+				main = self._frame.findFirstElement("#summary-content")
+				rows = main.findAll("tr")
+				self.period = None
 
-		try:
-			summary_btn = self._frame.findFirstElement("#a-match-statistics")
-			util.simulate_click(summary_btn)
-		except Exception as e:
-			print("puklo na klik statistics", e)
+				time = {}
+				team1 = []
+				team2 = []
+				summary["1st Half"] = {}
+				summary["2nd Half"] = {}
 
-		try:
-			summary = self._frame.findFirstElement("#summary-content")
-			rows = summary.findAll("tr")
+				for i in range(len(rows)):
+					self.team1 = None
+					self.team2 = None
+					self.score = None
+					col = rows.at(i).findAll('td')
 
-			self.period = None
-			for i in range(len(rows)):
-				self.team1 = None
-				self.score = None
-				col = rows.at(i).findAll('td')
-				if len(col) == 1:
-					self.period = col.at(0).toPlainText().strip()
-				if len(col) == 3:
-					self.team1 = col.at(0).toPlainText().strip()
-					self.score = col.at(1).toPlainText().strip()
-				if len(col) == 2:
-					self.team1 = col.at(0).toPlainText().strip()
+					if len(col) == 1:
+						self.period = col.at(0).toPlainText().strip()
+						team1 = []
+						team2 = []
 
-				if self.team1 not in [" ", "", None]:
-					summary[self.period] = {"team1": self.team1}
-				if self.score:
-					summary[self.period] = {"score": self.score}
+					if len(col) == 3:
+						self.team1 = col.at(0).toPlainText().strip().replace("\xa0", "")
+						if self.team1 not in [" ", "", None]:
+							self.time = col.at(0).findAll(".time-box").at(0).toPlainText().strip().replace("\n ", "")
+							self.type = col.at(0).findAll(".icon").at(0).attribute("class").replace("icon ", "")
+							self.team1 = self.team1.replace(self.time, "").replace(self.type, "").replace("\n ", "")
+							time[self.time] = self.type, self.team1
+							team1.append(time)
+							time = {}
 
-			self.period = None
-			for i in range(len(rows)):
-				self.team2 = None
-				self.score = None
-				col = rows.at(i).findAll('td')
-				if len(col) == 1:
-					self.period = col.at(0).toPlainText().strip()
-				if len(col) == 3:
-					self.team2 = col.at(2).toPlainText().strip()
-					self.score = col.at(1).toPlainText().strip()
-				if len(col) == 2:
-					self.team2 = col.at(1).toPlainText().strip()
+						self.team2 = col.at(2).toPlainText().strip().replace("\xa0", "")
+						if self.team2 not in [" ", "", None]:
+							self.time = col.at(2).findAll(".time-box").at(0).toPlainText().strip().replace("\n ", "")
+							self.type = col.at(2).findAll(".icon").at(0).attribute("class").replace("icon ", "")
+							self.team2 = self.team2.replace(self.time, "").replace(self.type, "").replace("\n ", "")
+							time[self.time] = self.type, self.team2
+							team2.append(time)
+							time = {}
 
-				if self.team2 not in [" ", "", None]:
-					summary[self.period] = {"team1": self.team2}
-				if self.score:
-					summary[self.period] = {"score": self.score}
+						self.score = col.at(1).toPlainText().strip().replace(" ", "")
 
-		except Exception as e:
-			print("Puklo na SUMMARY")
+					if len(col) == 2:
+						self.team1 = col.at(0).toPlainText().strip().replace("\xa0", "")
+						if self.team1 not in [" ", "", None]:
+							self.time = col.at(0).findAll(".time-box").at(0).toPlainText().strip().replace("\n ", "")
+							self.type = col.at(0).findAll(".icon").at(0).attribute("class").replace("icon ", "")
+							self.team1 = self.team1.replace(self.time, "").replace(self.type, "").replace("\n ", "")
+							time[self.time] = self.type, self.team1
+							team1.append(time)
+							time = {}
 
-		try:
-			statistic = self._frame.findFirstElement("#tab-statistics-0-statistic")
-			rows = statistic.findAll('tr')
+						self.team2 = col.at(1).toPlainText().strip().replace("\xa0", "")
+						if self.team2 not in [" ", "", None]:
+							self.time = col.at(1).findAll(".time-box").at(0).toPlainText().strip().replace("\n ", "")
+							self.type = col.at(1).findAll(".icon").at(0).attribute("class").replace("icon ", "")
+							self.team2 = self.team2.replace(self.time, "").replace(self.type, "").replace("\n ", "")
+							time[self.time] = self.type, self.team2
+							team2.append(time)
+							time = {}
 
-			for i in range(len(rows)):
-				stats_name = rows.at(i).findAll('td').at(1).toPlainText().strip()
-				stats_team1 = rows.at(i).findAll('td').at(0).toPlainText().strip()
-				stats_team2 = rows.at(i).findAll('td').at(2).toPlainText().strip()
+					if self.team1 not in [" ", "", None]:
+						summary[self.period]["team1"] = team1
 
-				statistics[stats_name] = {'team1': stats_team1, 'team2': stats_team2}
+					if self.team2 not in [" ", "", None]:
+						summary[self.period]["team2"] = team2
 
-		except Exception as e:
-			print("Puklo na STATISTICS")
+					if self.score:
+						summary[self.period]["score"] = self.score
+					# print("aaaaaaaa", summary)
 
-		# https://www.flashscore.com/match/OnDFnJ4P/#match-summary
-		print("0000000000000000000000000")
-		print(summary)
-		print()
-		print()
-		print(statistics)
-		print("0000000000000000000000000")
-		#dodaj statistiku u redis
+			except Exception as e:
+				print("Puklo na SUMMARY", e)
+
+			try:
+				main = self._frame.findFirstElement("#tab-statistics-0-statistic")
+				rows = main.findAll('tr')
+
+				for i in range(len(rows)):
+
+					stats_name = rows.at(i).findAll('td').at(1).toPlainText().strip()
+					stats_team1 = rows.at(i).findAll('td').at(0).toPlainText().strip()
+					stats_team2 = rows.at(i).findAll('td').at(2).toPlainText().strip()
+
+					statistics[stats_name] = {'team1': stats_team1, 'team2': stats_team2}
+
+			except Exception as e:
+				print("Puklo na STATISTICS", e)
+
+			# https://www.flashscore.com/match/OnDFnJ4P/#match-summary
+			print("0000000000000000000000000")
+			print(summary)
+			print()
+			print(statistics)
+			print("0000000000000000000000000")
+
+			self.resourse_check()
+			self.summary_click = True
+			QTimer().singleShot(3000, self.match_statistics)
+			#dodaj statistiku u redis
 
 
 
