@@ -19,8 +19,7 @@ sys.path.insert(0, '../')
 import util
 from config import *
 import common
-
-
+import random
 
 class Collector(QWebPage):
 
@@ -167,16 +166,19 @@ class Collector(QWebPage):
 	def match_statistics(self):
 
 		# self.statistics.stop()
-		print("ppppppppppppppppppppppppppppp")
+		# print("ppppppppppppppppppppppppppppp")
 		team_names = self.redis.smembers("team_names")
-		print(len(team_names), "stefan 11111")
-		print("ooooooooooooooooooooooooooooo")
-
+		# print(len(team_names), "stefan 11111")
 
 		if len(team_names) == 0:
+			print(len(team_names), "stefan 11111")
+
+			cmd = 'python3 {}stop.py'.format(project_root_path)
+			subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 			QTimer().singleShot(30000, self.match_statistics)
 
-
+		team_names = (list(team_names))
+		random.shuffle(team_names)
 		for team in team_names:
 
 			matches = self.redis.hgetall(team)
@@ -189,42 +191,34 @@ class Collector(QWebPage):
 				except:
 					print("Ne moze da uradi brisanje")
 					continue
-			print("LETS BEGIN")
-			for i in matches:
-				try:
+			else:
+				# print("LETS BEGIN")
+				matches = (list(matches))
+				random.shuffle(matches)
+				for i in matches:
+
+					print(team, i, "\n\n")
+
 					if self.redis.hget("processed", team) == i:
-						print("OBRADJENOOOOOOOOOO", team, i)
-						print("OBRADJENOOOOOOOOOO", team, i)
-						print("OBRADJENOOOOOOOOOO", team, i)
-						print("OBRADJENOOOOOOOOOO", team, i)
-						print("OBRADJENOOOOOOOOOO", team, i)
-						QTimer().singleShot(3000, self.parse_statistics)
+						print("\nOBRADJENOOOOOOOOOO", team, i, "\n")
+						QTimer().singleShot(2000, self.match_statistics)
 						break
-				except:
-					print("OBRADJENOOOOOOOOOO", team, i)
-					print("OBRADJENOOOOOOOOOO", team, i)
-					print("OBRADJENOOOOOOOOOO", team, i)
-					print("OBRADJENOOOOOOOOOO", team, i)
-					print("OBRADJENOOOOOOOOOO", team, i)
+
+					self.redis.hset("processed", team, i)
+
+					match = json.loads(matches[i])
+
+					# print("https://www.flashscore.com/match/{}/#match-summary".format(match['flashscore_id']))
+					self._frame.load(QNetworkRequest(QUrl("https://www.flashscore.com/match/{}/#match-summary".format(match['flashscore_id']))))
+
+					self.summary_click = True
 					QTimer().singleShot(3000, self.parse_statistics)
+
+					self.team = team
+					self.i = i
+
 					break
-
-				self.redis.hset("processed", team, i)
-
-				match = json.loads(matches[i])
-
-				print("https://www.flashscore.com/match/{}/#match-summary".format(match['flashscore_id']))
-				self._frame.load(QNetworkRequest(QUrl("https://www.flashscore.com/match/{}/#match-summary".format(match['flashscore_id']))))
-
-				self.summary_click = True
-				QTimer().singleShot(3000, self.parse_statistics)
-
-				self.team = team
-				self.i = i
-
-				break
 			break
-
 
 	def parse_statistics(self):
 		summary = {}
@@ -235,11 +229,11 @@ class Collector(QWebPage):
 				util.simulate_click(summary_btn)
 				self.summary_click = False
 				QTimer().singleShot(2000, self.parse_statistics)
-				print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+				# print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 			except Exception as e:
 				self.summary_click = False
-				QTimer().singleShot(2000, self.parse_statistics)
-				print("puklo na klik statistics", e)
+				QTimer().singleShot(3000, self.parse_statistics)
+				print("\npuklo na klik statistics\n", e)
 		else:
 			try:
 				main = self._frame.findFirstElement("#summary-content")
@@ -251,11 +245,13 @@ class Collector(QWebPage):
 				team2 = []
 				summary["1st Half"] = {}
 				summary["2nd Half"] = {}
+				summary["Extra Time"] = {}
+				summary["Penalties"] = {}
 
 				for i in range(len(rows)):
-					self.text_left = False
-					self.text_right = False
-					self.score = False
+					self.text_left = None
+					self.text_right = None
+					self.score = None
 					col = rows.at(i).findAll('td')
 
 					if len(col) == 1:
@@ -312,58 +308,66 @@ class Collector(QWebPage):
 					if self.score not in [" ", "", None]:
 						summary[self.period]["score"] = self.score
 
-				main = self._frame.findFirstElement("#tab-statistics-0-statistic")
-				rows = main.findAll('tr')
+				try:
+					main = self._frame.findFirstElement("#tab-statistics-0-statistic")
+					rows = main.findAll('tr')
 
-				for i in range(len(rows)):
+					for i in range(len(rows)):
 
-					stats_name = rows.at(i).findAll('td').at(1).toPlainText().strip()
-					stats_team1 = rows.at(i).findAll('td').at(0).toPlainText().strip()
-					stats_team2 = rows.at(i).findAll('td').at(2).toPlainText().strip()
+						stats_name = rows.at(i).findAll('td').at(1).toPlainText().strip()
+						stats_team1 = rows.at(i).findAll('td').at(0).toPlainText().strip()
+						stats_team2 = rows.at(i).findAll('td').at(2).toPlainText().strip()
 
-					statistics[stats_name] = {'team1': stats_team1, 'team2': stats_team2}
+						statistics[stats_name] = {'team1': stats_team1, 'team2': stats_team2}
+				except Exception as e:
+					print("\nPotraga za statistikom nije uspela\n", e)
 
 			except Exception as e:
 				self.redis.hdel("processed", self.team)
 				print("Puklo na STATISTICS", e)
 				print("Puklo na SUMMARY", e)
+				self.redis.hset("processed", self.team, self.i)
+				self.match_statistics()
+
 
 			# https://www.flashscore.com/match/OnDFnJ4P/#match-summary
-			print("0000000000000000000000000")
-			print(summary)
-			print()
-			print(statistics)
-			print("0000000000000000000000000")
+			# print("0000000000000000000000000")
+			# print(summary)
+			# print()
+			# print(statistics)
+			# print("0000000000000000000000000")
+			try:
+				event = json.loads(self.redis.hget(self.team, self.i))
 
-			event = json.loads(self.redis.hget(self.team, self.i))
+				self.redis.hset("@@"+self.team, self.i, json.dumps(event))
 
-			self.redis.hset("@@"+self.team, self.i, json.dumps(event))
+				event["statistics"] = statistics
+				event["summary"] = summary
 
-			event["statistics"] = statistics
-			event["summary"] = summary
+				self.redis.hset("!!"+self.team, self.i, json.dumps(event))
 
-			self.redis.hset("!!"+self.team, self.i, json.dumps(event))
+				self.redis.hdel(self.team, self.i)
 
-			self.redis.hdel(self.team, self.i)
-
-			self.resourse_check()
-			self.summary_click = True
-			QTimer().singleShot(2000, self.match_statistics)
-			print("TA TA TA TIRA")
-			#dodaj statistiku u redis
-
-
+				self.resourse_check()
+				self.summary_click = True
+				QTimer().singleShot(2000, self.match_statistics)
+				# print("TA TA TA TIRA")
+				#dodaj statistiku u redis
+			except Exception as e:
+				print("Doslo je do otvaranja istog eventa u 2 prozora, vec je upisan", self.team, self.i, "--", e)
+				self.redis.hset("processed", self.team, self.i)
+				QTimer().singleShot(2000, self.match_statistics)
 
 
 	def resourse_check(self):
 
-		print('!!!!!!!!!!!!!!!!!!!!!!iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+		# print('!!!!!!!!!!!!!!!!!!!!!!iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 600000:
 			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			self.reload_collector()
 			print("Presao limit")
-		print("BAZINGA")
+		# print("BAZINGA")
 
 	def reload_collector(self):
 		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]

@@ -25,8 +25,8 @@
       <file leaf-file-name="collector_leagues.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/classes/collector_leagues.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="676">
-              <caret line="398" column="80" lean-forward="false" selection-start-line="398" selection-start-column="80" selection-end-line="398" selection-end-column="80" />
+            <state relative-caret-position="360">
+              <caret line="20" column="13" lean-forward="false" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
               <folding>
                 <element signature="e#24#39#0" expanded="true" />
               </folding>
@@ -37,8 +37,8 @@
       <file leaf-file-name="collector_statistics.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/classes/collector_statistics.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="184">
-              <caret line="311" column="57" lean-forward="false" selection-start-line="311" selection-start-column="57" selection-end-line="311" selection-end-column="57" />
+            <state relative-caret-position="774">
+              <caret line="358" column="64" lean-forward="false" selection-start-line="358" selection-start-column="64" selection-end-line="358" selection-end-column="64" />
               <folding>
                 <element signature="e#24#39#0" expanded="true" />
               </folding>
@@ -124,10 +124,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>sidebar_match_info</find>
-      <find>current_event_index</find>
-      <find>finisher_action</find>
-      <find>check_redis_interval</find>
       <find>finisher_timer</find>
       <find>_collector_scan</find>
       <find>force_finish_hashes</find>
@@ -149,11 +145,15 @@
       <find>sport</find>
       <find>teams</find>
       <find>&quot;team_links&quot;</find>
-      <find>parse_teams</find>
       <find>team_names</find>
       <find>hdel</find>
       <find>summary_click</find>
+      <find>self.score</find>
       <find>leagues_links</find>
+      <find>Puklo na dohvatanju eventa</find>
+      <find>parse_teams</find>
+      <find>break</find>
+      <find>55555555555555((((((((((((((((((((((((</find>
     </findStrings>
     <replaceStrings>
       <replace>/log/sbp/flashscores/</replace>
@@ -212,6 +212,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="Scratches">
         <subPane>
           <PATH>
@@ -282,7 +283,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -649,10 +649,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="936">
           <caret line="126" column="54" lean-forward="false" selection-start-line="126" selection-start-column="54" selection-end-line="126" selection-end-column="54" />
-          <folding>
-            <element signature="e#0#10#0" expanded="false" />
-            <element signature="e#1998#3287#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -733,10 +729,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="936">
           <caret line="126" column="54" lean-forward="false" selection-start-line="126" selection-start-column="54" selection-end-line="126" selection-end-column="54" />
-          <folding>
-            <element signature="e#0#10#0" expanded="false" />
-            <element signature="e#1998#3287#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -807,10 +799,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="936">
           <caret line="126" column="54" lean-forward="false" selection-start-line="126" selection-start-column="54" selection-end-line="126" selection-end-column="54" />
-          <folding>
-            <element signature="e#0#10#0" expanded="false" />
-            <element signature="e#1998#3287#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -904,10 +892,21 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="648">
           <caret line="48" column="12" lean-forward="false" selection-start-line="48" selection-start-column="12" selection-end-line="48" selection-end-column="12" />
-          <folding>
-            <element signature="e#0#10#0" expanded="false" />
-            <element signature="e#1998#3287#0" expanded="false" />
-          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2016.3/system/python_stubs/-1247971764/PyQt5/QtCore/QTimer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="557">
+          <caret line="35" column="28" lean-forward="false" selection-start-line="35" selection-start-column="28" selection-end-line="35" selection-end-column="28" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -927,20 +926,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
+    <entry file="file://$PROJECT_DIR$/util.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/classes/collector.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1836">
-          <caret line="116" column="0" lean-forward="true" selection-start-line="116" selection-start-column="0" selection-end-line="116" selection-end-column="0" />
-          <folding>
-            <element signature="e#24#39#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="1566">
+          <caret line="113" column="4" lean-forward="false" selection-start-line="113" selection-start-column="4" selection-end-line="113" selection-end-column="4" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -952,11 +942,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/util.py">
+    <entry file="file://$PROJECT_DIR$/classes/collector.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1566">
-          <caret line="113" column="4" lean-forward="false" selection-start-line="113" selection-start-column="4" selection-end-line="113" selection-end-column="4" />
-          <folding />
+        <state relative-caret-position="1836">
+          <caret line="116" column="0" lean-forward="true" selection-start-line="116" selection-start-column="0" selection-end-line="116" selection-end-column="0" />
+          <folding>
+            <element signature="e#24#39#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -978,18 +970,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2016.3/system/python_stubs/-1247971764/PyQt5/QtCore/QTimer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="557">
-          <caret line="35" column="28" lean-forward="false" selection-start-line="35" selection-start-column="28" selection-end-line="35" selection-end-column="28" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/classes/collector_leagues.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="676">
-          <caret line="398" column="80" lean-forward="false" selection-start-line="398" selection-start-column="80" selection-end-line="398" selection-end-column="80" />
+        <state relative-caret-position="360">
+          <caret line="20" column="13" lean-forward="false" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
           <folding>
             <element signature="e#24#39#0" expanded="true" />
           </folding>
@@ -998,8 +982,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/classes/collector_statistics.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
-          <caret line="311" column="57" lean-forward="false" selection-start-line="311" selection-start-column="57" selection-end-line="311" selection-end-column="57" />
+        <state relative-caret-position="774">
+          <caret line="358" column="64" lean-forward="false" selection-start-line="358" selection-start-column="64" selection-end-line="358" selection-end-column="64" />
           <folding>
             <element signature="e#24#39#0" expanded="true" />
           </folding>

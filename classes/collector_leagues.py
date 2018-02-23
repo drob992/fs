@@ -96,6 +96,8 @@ class Collector(QWebPage):
 
 		if self.first_load:
 
+			self.redis.delete("processed")
+
 			self.statistics = QTimer()
 			self.statistics.timeout.connect(self.match_statistics)
 			self.statistics.start(10000)
@@ -388,14 +390,23 @@ class Collector(QWebPage):
 				if not allready_running:
 					print("PUSTAM")
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					time.sleep(2)
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					time.sleep(2)
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					time.sleep(2)
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					time.sleep(2)
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					time.sleep(2)
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					time.sleep(2)
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					time.sleep(2)
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					time.sleep(2)
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					time.sleep(2)
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 				else:
 					print("RADI")
