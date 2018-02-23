@@ -151,15 +151,15 @@ class Collector(QWebPage):
 
 				country = country_list.at(i).findAll("a").at(0)
 				# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
-				# Uzimamo samo Englesku
-				if country.toPlainText().strip() in ["England"]:
+				# Uzimamo samo Germany
+				if country.toPlainText().strip() in ["Germany"]:
 
 					league_list = country_list.at(i).findAll("ul").at(0).findAll("li")
 					for x in range(0, len(league_list)):
 						league = league_list.at(x).findAll("a").at(0)
 
-						# Uzimamo samo Premier Ligu
-						if league.toPlainText().strip() in ["Premier League"]:
+						# Uzimamo samo Bundesliga
+						if league.toPlainText().strip() in ["Bundesliga"]:
 							print(league.toPlainText().strip())
 							self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
 							self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
@@ -175,15 +175,15 @@ class Collector(QWebPage):
 
 				country = country_list1.at(i).findAll("a").at(0)
 				# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
-				# Uzimamo samo Englesku
-				if country.toPlainText().strip() in ["England"]:
+				# Uzimamo samo Germany
+				if country.toPlainText().strip() in ["Germany"]:
 
 					league_list = country_list1.at(i).findAll("ul").at(0).findAll("li")
 					for x in range(0, len(league_list)):
 						league = league_list.at(x).findAll("a").at(0)
 
-						# Uzimamo samo Premier Ligu
-						if league.toPlainText().strip() in ["Premier League"]:
+						# Uzimamo samo Bundesliga
+						if league.toPlainText().strip() in ["Bundesliga"]:
 							print(league.toPlainText().strip())
 							self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
 							self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
@@ -387,6 +387,8 @@ class Collector(QWebPage):
 				print("JEL RADI")
 				if not allready_running:
 					print("PUSTAM")
+					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)

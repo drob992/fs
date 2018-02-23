@@ -81,6 +81,7 @@ class Collector(QWebPage):
 		# connect signals and slots
 		self.loadFinished.connect(self.read_page)
 
+		self.summary_click = True
 		self._check_hash_counter = 0
 
 		if self.debug:
@@ -168,7 +169,7 @@ class Collector(QWebPage):
 		# self.statistics.stop()
 		print("ppppppppppppppppppppppppppppp")
 		team_names = self.redis.smembers("team_names")
-		print(len(team_names))
+		print(len(team_names), "stefan 11111")
 		print("ooooooooooooooooooooooooooooo")
 
 
@@ -182,13 +183,13 @@ class Collector(QWebPage):
 
 			if len(matches) == 0 or team in ["", " ", None]:
 				try:
-					print(len(matches))
+					print(len(matches), "stefan 222222")
 					self.redis.srem("team_names", team)
 					continue
 				except:
 					print("Ne moze da uradi brisanje")
 					continue
-
+			print("LETS BEGIN")
 			for i in matches:
 				try:
 					if self.redis.hget("processed", team) == i:
@@ -216,8 +217,10 @@ class Collector(QWebPage):
 				self._frame.load(QNetworkRequest(QUrl("https://www.flashscore.com/match/{}/#match-summary".format(match['flashscore_id']))))
 
 				self.summary_click = True
-				self.redis.hdel(team, i)
 				QTimer().singleShot(3000, self.parse_statistics)
+
+				self.team = team
+				self.i = i
 
 				break
 			break
@@ -250,9 +253,9 @@ class Collector(QWebPage):
 				summary["2nd Half"] = {}
 
 				for i in range(len(rows)):
-					self.text_left = None
-					self.text_right = None
-					self.score = None
+					self.text_left = False
+					self.text_right = False
+					self.score = False
 					col = rows.at(i).findAll('td')
 
 					if len(col) == 1:
@@ -306,14 +309,9 @@ class Collector(QWebPage):
 					if self.text_right not in [" ", "", None]:
 						summary[self.period]["team2"] = team2
 
-					if self.score:
+					if self.score not in [" ", "", None]:
 						summary[self.period]["score"] = self.score
-					# print("aaaaaaaa", summary)
 
-			except Exception as e:
-				print("Puklo na SUMMARY", e)
-
-			try:
 				main = self._frame.findFirstElement("#tab-statistics-0-statistic")
 				rows = main.findAll('tr')
 
@@ -326,7 +324,9 @@ class Collector(QWebPage):
 					statistics[stats_name] = {'team1': stats_team1, 'team2': stats_team2}
 
 			except Exception as e:
+				self.redis.hdel("processed", self.team)
 				print("Puklo na STATISTICS", e)
+				print("Puklo na SUMMARY", e)
 
 			# https://www.flashscore.com/match/OnDFnJ4P/#match-summary
 			print("0000000000000000000000000")
@@ -334,6 +334,17 @@ class Collector(QWebPage):
 			print()
 			print(statistics)
 			print("0000000000000000000000000")
+
+			event = json.loads(self.redis.hget(self.team, self.i))
+
+			self.redis.hset("@@"+self.team, self.i, json.dumps(event))
+
+			event["statistics"] = statistics
+			event["summary"] = summary
+
+			self.redis.hset("!!"+self.team, self.i, json.dumps(event))
+
+			self.redis.hdel(self.team, self.i)
 
 			self.resourse_check()
 			self.summary_click = True
