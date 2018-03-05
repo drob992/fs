@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6dff6a00-5f10-4878-b804-abd85c7ee666" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.gitignore" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/classes/collector_leagues.py" afterPath="$PROJECT_DIR$/classes/collector_leagues.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/classes/collector_statistics.py" afterPath="$PROJECT_DIR$/classes/collector_statistics.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -25,7 +24,7 @@
       <file leaf-file-name="collector_leagues.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/classes/collector_leagues.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-880">
+            <state relative-caret-position="6156">
               <caret line="356" column="50" lean-forward="false" selection-start-line="356" selection-start-column="50" selection-end-line="356" selection-end-column="50" />
               <folding>
                 <element signature="e#24#39#0" expanded="true" />
@@ -37,7 +36,7 @@
       <file leaf-file-name="collector_statistics.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/classes/collector_statistics.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-56">
+            <state relative-caret-position="6084">
               <caret line="352" column="63" lean-forward="false" selection-start-line="352" selection-start-column="47" selection-end-line="352" selection-end-column="63" />
               <folding>
                 <element signature="e#24#39#0" expanded="true" />
@@ -46,14 +45,24 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="sports.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="sports.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/classes/sports.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-11140">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            <state relative-caret-position="108">
+              <caret line="6" column="19" lean-forward="false" selection-start-line="6" selection-start-column="19" selection-end-line="6" selection-end-column="19" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="54">
+              <caret line="3" column="5" lean-forward="true" selection-start-line="3" selection-start-column="5" selection-end-line="3" selection-end-column="5" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -66,16 +75,6 @@
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="scratch_1.py" pinned="false" current-in-tab="false">
-        <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_1.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="972">
-              <caret line="54" column="60" lean-forward="false" selection-start-line="54" selection-start-column="60" selection-end-line="59" selection-end-column="59" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -195,6 +194,7 @@
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/classes/collector_statistics.py" />
         <option value="$PROJECT_DIR$/classes/collector_leagues.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -567,7 +567,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="30" width="1920" height="1050" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -602,13 +602,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/.PyCharm2016.3/system/python_stubs/-1247971764/PyQt5/QtCore/QTimer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="756">
-          <caret line="42" column="8" lean-forward="false" selection-start-line="42" selection-start-column="8" selection-end-line="42" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm2016.3/system/python_stubs/-1247971764/PyQt5/QtTest.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1656">
@@ -971,7 +964,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/classes/collector_leagues.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-880">
+        <state relative-caret-position="6156">
           <caret line="356" column="50" lean-forward="false" selection-start-line="356" selection-start-column="50" selection-end-line="356" selection-end-column="50" />
           <folding>
             <element signature="e#24#39#0" expanded="true" />
@@ -981,7 +974,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/classes/collector_statistics.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-56">
+        <state relative-caret-position="6084">
           <caret line="352" column="63" lean-forward="false" selection-start-line="352" selection-start-column="47" selection-end-line="352" selection-end-column="63" />
           <folding>
             <element signature="e#24#39#0" expanded="true" />
@@ -991,11 +984,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/classes/sports.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-11140">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="108">
+          <caret line="6" column="19" lean-forward="false" selection-start-line="6" selection-start-column="19" selection-end-line="6" selection-end-column="19" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="3" column="5" lean-forward="true" selection-start-line="3" selection-start-column="5" selection-end-line="3" selection-end-column="5" />
+          <folding />
         </state>
       </provider>
     </entry>
