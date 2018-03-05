@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6dff6a00-5f10-4878-b804-abd85c7ee666" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-    </list>
+    <list default="true" id="6dff6a00-5f10-4878-b804-abd85c7ee666" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -21,10 +18,10 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="collector_leagues.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="collector_leagues.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/classes/collector_leagues.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6156">
+            <state relative-caret-position="1530">
               <caret line="356" column="50" lean-forward="false" selection-start-line="356" selection-start-column="50" selection-end-line="356" selection-end-column="50" />
               <folding>
                 <element signature="e#24#39#0" expanded="true" />
@@ -36,7 +33,7 @@
       <file leaf-file-name="collector_statistics.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/classes/collector_statistics.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6084">
+            <state relative-caret-position="18">
               <caret line="352" column="63" lean-forward="false" selection-start-line="352" selection-start-column="47" selection-end-line="352" selection-end-column="63" />
               <folding>
                 <element signature="e#24#39#0" expanded="true" />
@@ -53,16 +50,6 @@
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="54">
-              <caret line="3" column="5" lean-forward="true" selection-start-line="3" selection-start-column="5" selection-end-line="3" selection-end-column="5" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -962,23 +949,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/classes/collector_leagues.py">
+    <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6156">
-          <caret line="356" column="50" lean-forward="false" selection-start-line="356" selection-start-column="50" selection-end-line="356" selection-end-column="50" />
-          <folding>
-            <element signature="e#24#39#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/classes/collector_statistics.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6084">
-          <caret line="352" column="63" lean-forward="false" selection-start-line="352" selection-start-column="47" selection-end-line="352" selection-end-column="63" />
-          <folding>
-            <element signature="e#24#39#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="54">
+          <caret line="3" column="5" lean-forward="true" selection-start-line="3" selection-start-column="5" selection-end-line="3" selection-end-column="5" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -992,11 +967,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
+    <entry file="file://$PROJECT_DIR$/classes/collector_statistics.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="3" column="5" lean-forward="true" selection-start-line="3" selection-start-column="5" selection-end-line="3" selection-end-column="5" />
-          <folding />
+        <state relative-caret-position="18">
+          <caret line="352" column="63" lean-forward="false" selection-start-line="352" selection-start-column="47" selection-end-line="352" selection-end-column="63" />
+          <folding>
+            <element signature="e#24#39#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/classes/collector_leagues.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1530">
+          <caret line="356" column="50" lean-forward="false" selection-start-line="356" selection-start-column="50" selection-end-line="356" selection-end-column="50" />
+          <folding>
+            <element signature="e#24#39#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
