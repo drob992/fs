@@ -25,8 +25,8 @@
       <file leaf-file-name="collector_leagues.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/classes/collector_leagues.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="20" column="13" lean-forward="false" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
+            <state relative-caret-position="-880">
+              <caret line="356" column="50" lean-forward="false" selection-start-line="356" selection-start-column="50" selection-end-line="356" selection-end-column="50" />
               <folding>
                 <element signature="e#24#39#0" expanded="true" />
               </folding>
@@ -34,13 +34,25 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="collector_statistics.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="collector_statistics.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/classes/collector_statistics.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="774">
-              <caret line="358" column="64" lean-forward="false" selection-start-line="358" selection-start-column="64" selection-end-line="358" selection-end-column="64" />
+            <state relative-caret-position="-56">
+              <caret line="352" column="63" lean-forward="false" selection-start-line="352" selection-start-column="47" selection-end-line="352" selection-end-column="63" />
               <folding>
                 <element signature="e#24#39#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="sports.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/classes/sports.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-11140">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -102,7 +114,7 @@
         <entry file="file://$PROJECT_DIR$/classes/collector.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1836">
-              <caret line="116" column="0" lean-forward="true" selection-start-line="116" selection-start-column="0" selection-end-line="116" selection-end-column="0" />
+              <caret line="116" column="0" lean-forward="false" selection-start-line="116" selection-start-column="0" selection-end-line="116" selection-end-column="0" />
               <folding>
                 <element signature="e#24#39#0" expanded="true" />
               </folding>
@@ -181,8 +193,8 @@
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_1.py" />
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch.py" />
         <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/classes/collector_leagues.py" />
         <option value="$PROJECT_DIR$/classes/collector_statistics.py" />
+        <option value="$PROJECT_DIR$/classes/collector_leagues.py" />
       </list>
     </option>
   </component>
@@ -213,20 +225,6 @@
     </navigator>
     <panes>
       <pane id="Scope" />
-      <pane id="Scratches">
-        <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" />
-              <option name="myItemType" value="com.intellij.ide.scratch.ScratchProjectViewPane$MyProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Scratches" />
-              <option name="myItemType" value="com.intellij.ide.scratch.ScratchProjectViewPane$MyRootNode" />
-            </PATH_ELEMENT>
-          </PATH>
-        </subPane>
-      </pane>
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -279,6 +277,20 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="classes" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+      <pane id="Scratches">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" />
+              <option name="myItemType" value="com.intellij.ide.scratch.ScratchProjectViewPane$MyProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Scratches" />
+              <option name="myItemType" value="com.intellij.ide.scratch.ScratchProjectViewPane$MyRootNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
@@ -555,7 +567,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="30" width="1920" height="1050" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -590,19 +602,10 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/util.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="846">
-          <caret line="47" column="9" lean-forward="false" selection-start-line="47" selection-start-column="9" selection-end-line="47" selection-end-column="9" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm2016.3/system/python_stubs/-1247971764/PyQt5/QtCore/QTimer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="756">
           <caret line="42" column="8" lean-forward="false" selection-start-line="42" selection-start-column="8" selection-end-line="42" selection-end-column="8" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -682,7 +685,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="702">
           <caret line="42" column="8" lean-forward="false" selection-start-line="42" selection-start-column="8" selection-end-line="42" selection-end-column="8" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -762,7 +764,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="702">
           <caret line="42" column="8" lean-forward="false" selection-start-line="42" selection-start-column="8" selection-end-line="42" selection-end-column="8" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -884,7 +885,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="305">
           <caret line="5581" column="8" lean-forward="false" selection-start-line="5581" selection-start-column="8" selection-end-line="5581" selection-end-column="8" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -906,7 +906,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="557">
           <caret line="35" column="28" lean-forward="false" selection-start-line="35" selection-start-column="28" selection-end-line="35" selection-end-column="28" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -945,7 +944,7 @@
     <entry file="file://$PROJECT_DIR$/classes/collector.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1836">
-          <caret line="116" column="0" lean-forward="true" selection-start-line="116" selection-start-column="0" selection-end-line="116" selection-end-column="0" />
+          <caret line="116" column="0" lean-forward="false" selection-start-line="116" selection-start-column="0" selection-end-line="116" selection-end-column="0" />
           <folding>
             <element signature="e#24#39#0" expanded="true" />
           </folding>
@@ -972,8 +971,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/classes/collector_leagues.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="20" column="13" lean-forward="false" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
+        <state relative-caret-position="-880">
+          <caret line="356" column="50" lean-forward="false" selection-start-line="356" selection-start-column="50" selection-end-line="356" selection-end-column="50" />
           <folding>
             <element signature="e#24#39#0" expanded="true" />
           </folding>
@@ -982,10 +981,20 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/classes/collector_statistics.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="774">
-          <caret line="358" column="64" lean-forward="false" selection-start-line="358" selection-start-column="64" selection-end-line="358" selection-end-column="64" />
+        <state relative-caret-position="-56">
+          <caret line="352" column="63" lean-forward="false" selection-start-line="352" selection-start-column="47" selection-end-line="352" selection-end-column="63" />
           <folding>
             <element signature="e#24#39#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/classes/sports.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-11140">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -303,7 +303,6 @@ class Collector(QWebPage):
 		# 		QTimer().singleShot(1000, self.parse_team)
 		#
 		# else:
-		print("5555555555&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 
 		main = self._frame.findFirstElement("#main")
 		try:
@@ -326,7 +325,6 @@ class Collector(QWebPage):
 		score = None
 		win_lose = None
 
-		print("55555555555555(((((((((((((((((((((((((")
 		for x in range(len(tr)):
 
 			row = tr.at(x)
@@ -352,12 +350,11 @@ class Collector(QWebPage):
 						print(country_part, tournament_part)
 						print(time, " - ", home, " - ", away, " - ", score, " - ", win_lose, " - ", id)
 
-		print("555555555555555!!!!!!!!!!!!!!!!!!")
 
 		self.redis.sadd("team_names", team_name)
 		self.resourse_check()
 		QTimer().singleShot(3000, self.open_leagues)
-		print("@!#!!@#!@$!@#!@#!@$!@$!$!#$")
+		print("555555555555555!!!!!!!!!!!!!!!!!!")
 
 	def match_statistics(self):
 

@@ -382,8 +382,6 @@ class Collector(QWebPage):
 				continue
 
 
-
-
 if __name__ == "__main__":
 
 	collector_log = util.parserLog('/var/log/sbp/flashscores/collector_statistics.log', 'flashscore-collector')
