@@ -28,12 +28,13 @@ class Collector(QWebPage):
 	# define signal
 	newChanges = pyqtSignal(dict)
 
-	def __init__(self, parent=None, page_link=None, debug=None, logger=None):
+	def __init__(self, parent=None, page_link=None, debug=None, logger=None, order_num=None):
 		super(Collector, self).__init__(parent)
 
 		self._parent = parent
 		self.debug = debug
 		self.log = logger
+		self.order_num = order_num
 
 		self.EVENT = None
 
@@ -83,6 +84,8 @@ class Collector(QWebPage):
 		self.summary_click = True
 		self._check_hash_counter = 0
 
+		self._content_hash = None
+
 		if self.debug:
 			self.log.info("Flashscore parser started, with headers: ")
 			for hd in self._req.rawHeaderList():
@@ -99,69 +102,38 @@ class Collector(QWebPage):
 
 		if self.first_load:
 
-			# self.statistics = QTimer()
-			# self.statistics.timeout.connect(self.match_statistics)
-			# self.statistics.start(10000)
+			self.hash = QTimer()
+			self.hash.timeout.connect(self.check_hash)
+			self.hash.start(10000)
 
 			QTimer().singleShot(2000, self.match_statistics)
 			self.first_load = False
 
 
 	def check_hash(self):
-		"""
-		:description:   metod koji sluzi kao delay za pocetak parsovanja stranice
-		:param seconds: koliko puta (sekundi) je potrebno da hash ostane nepromenjen da bi stranica bila spremna
-		:return:
-		"""
-	################################################################################################################################################
-		main = self._frame.findFirstElement('#Main')
 
-		if main.isNull():
-
-			self._check_hash_counter += 1
-			if self._check_hash_counter == common.window_not_active_limit[str(self._event_sport)]:
-				self.log.info("\nCheck hash brojac i limit za neaktivnost su se poklopili, restartujemo stranu")
-				self.reload_single_page()
+		self._check_hash_counter += 1
+		if self._check_hash_counter == 6:
+			self.log.info("\nCheck hash brojac i limit za neaktivnost su se poklopili, restartujemo stranu")
+			print("\nCheck hash brojac i limit za neaktivnost su se poklopili, restartujemo stranu")
+			self.redis.hdel("processed", self.team, self.i)
+			self.reload_collector()
 		else:
+			content_area = self._frame.findFirstElement('#content-all').toPlainText().strip()
+			content_hash = util.hash(content_area)
 
-			check_hash_sport = [True, "", ""]
-			if self.delay_kickoff_log is True:
-				if self._event_sport == "Football":
-					ht_flag = main.findAll('.ml1-Anims_H2Text').at(0).toPlainText().strip()
-					kickoff_flag = main.findAll('.ml1-ScoreHeader_AdditionalText').at(0).toPlainText().strip()
-					kickoff_flag2 = main.findAll('.ml1-FixtureInfo_KickOff').at(0).toPlainText().strip()
-					clock45_flag = main.findAll('.ml1-ScoreHeader_Clock').at(0).toPlainText().strip()
+			if self._content_hash == content_hash:
+				self._check_hash_counter += 1
+				self.log.info("{} sekundi nema promena na prozoru ".format(self._check_hash_counter))
+				if self._check_hash_counter == 6:
+					self.log.critical("Resetujemo prozor, nije bilo promena do zadatog limita")
+					print("Resetujemo prozor, nije bilo promena do zadatog limita")
+					self.redis.hdel("processed", self.team, self.i)
+					self.reload_collector()
+			else:
+				self._check_hash_counter = 0
 
-					if ht_flag != 'Half Time' and 'Kick Off' not in kickoff_flag and 'Kick Off' not in kickoff_flag2 and clock45_flag != '45:00':
-						check_hash_sport = [True, "", ""]
-					else:
-						check_hash_sport = [False, "", ""]
-
-				message_exp = check_hash_sport[1]
-				message_stats = check_hash_sport[2]
-				if message_exp != "":
-					self.log.critical(message_exp)
-				elif message_stats != "":
-					self.log.info(message_stats)
-
-			if check_hash_sport[0] is True:
-
-				content_area = main.findAll('.ip-MobileViewController').at(0).toPlainText().strip()
-				content_hash = util.hash(content_area)
-
-				if self._content_hash == content_hash:
-					self._check_hash_counter += 1
-					self.log.info("{} sekundi nema promena na prozoru ".format(self._check_hash_counter))
-					if self._check_hash_counter == common.window_not_active_limit[str(self._event_sport)]:
-						self.log.critical("Resetujemo prozor, nije bilo promena do zadatog limita")
-						self.reload_single_page()
-				else:
-					self._check_hash_counter = 0
-
-				self._content_hash = content_hash
-
-	################################################################################################################################################
-
+			self._content_hash = content_hash
 
 	def match_statistics(self):
 
@@ -193,11 +165,9 @@ class Collector(QWebPage):
 					continue
 			else:
 				# print("LETS BEGIN")
-				matches = (list(matches))
-				random.shuffle(matches)
 				for i in matches:
 
-					print(team, i, "\n\n")
+					print(team, i, " order_num {}\n\n".format(order_num))
 
 					if self.redis.hget("processed", team) == i:
 						print("\nOBRADJENOOOOOOOOOO", team, i, "\n")
@@ -236,8 +206,14 @@ class Collector(QWebPage):
 				print("\npuklo na klik statistics\n", e)
 		else:
 			try:
-				main = self._frame.findFirstElement("#summary-content")
-				rows = main.findAll("tr")
+				try:
+					main = self._frame.findFirstElement("#summary-content")
+					rows = main.findAll("tr")
+				except Exception as e:
+					print("\nNe mogu da nadjem stranicu\norder_num = ", self.order_num)
+
+					self.reload_collector()
+
 				self.period = None
 
 				time = {}
@@ -323,19 +299,12 @@ class Collector(QWebPage):
 					print("\nPotraga za statistikom nije uspela\n", e)
 
 			except Exception as e:
-				self.redis.hdel("processed", self.team)
-				print("Puklo na STATISTICS", e)
-				print("Puklo na SUMMARY", e)
+				self.redis.hdel("processed", self.team, self.i)
+				print("Puklo na STATISTICS order_num = ", self.order_num, e)
+				print("Puklo na SUMMARY order_num = ", self.order_num, e)
 				self.redis.hset("processed", self.team, self.i)
 				self.match_statistics()
 
-
-			# https://www.flashscore.com/match/OnDFnJ4P/#match-summary
-			# print("0000000000000000000000000")
-			# print(summary)
-			# print()
-			# print(statistics)
-			# print("0000000000000000000000000")
 			try:
 				event = json.loads(self.redis.hget(self.team, self.i))
 
@@ -346,6 +315,8 @@ class Collector(QWebPage):
 
 				self.redis.hset("!!"+self.team, self.i, json.dumps(event))
 
+				# data = util.redis_emmit(self.redis, self.team, event)
+
 				self.redis.hdel(self.team, self.i)
 
 				self.resourse_check()
@@ -355,7 +326,7 @@ class Collector(QWebPage):
 				#dodaj statistiku u redis
 			except Exception as e:
 				print("Doslo je do otvaranja istog eventa u 2 prozora, vec je upisan", self.team, self.i, "--", e)
-				self.redis.hset("processed", self.team, self.i)
+				self.redis.hdel("processed", self.team, self.i)
 				QTimer().singleShot(2000, self.match_statistics)
 
 
@@ -366,7 +337,7 @@ class Collector(QWebPage):
 			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			self.reload_collector()
-			print("Presao limit")
+			print("Presao limit\norder_num = ", self.order_num)
 		# print("BAZINGA")
 
 	def reload_collector(self):
@@ -374,8 +345,8 @@ class Collector(QWebPage):
 		for pid in pids:
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
-				if "collector_statistics" in proces_name and '/bin/sh' not in proces_name:
-					relaunch_cmd = "python3 {}".format(proces_name[10:-2])
+				if "collector_statistics" in proces_name and str(self.order_num) in proces_name and '/bin/sh' not in proces_name:
+					relaunch_cmd = "python3 collector_statistics.py {}".format(self.order_num)
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()
 			except IOError:
@@ -384,11 +355,13 @@ class Collector(QWebPage):
 
 if __name__ == "__main__":
 
+	order_num = sys.argv[-1]
+
 	collector_log = util.parserLog('/var/log/sbp/flashscores/collector_statistics.log', 'flashscore-collector')
 	# todo: if gui in sys.argv True
 	app = QApplication(sys.argv)
 	web = QWebView()
-	webpage = Collector(parent=web, page_link=common.live_link, debug=True, logger=collector_log)
+	webpage = Collector(parent=web, page_link=common.live_link, debug=True, logger=collector_log, order_num=order_num)
 	web.setPage(webpage)
 	web.setGeometry(780, 0, 1200, 768)
 	web.show()

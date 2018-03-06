@@ -154,14 +154,14 @@ class Collector(QWebPage):
 				country = country_list.at(i).findAll("a").at(0)
 				# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
 				# Uzimamo samo Germany
-				if country.toPlainText().strip() in ["Germany"]:
+				if country.toPlainText().strip() in ["Germany", "England"]:
 
 					league_list = country_list.at(i).findAll("ul").at(0).findAll("li")
 					for x in range(0, len(league_list)):
 						league = league_list.at(x).findAll("a").at(0)
 
 						# Uzimamo samo Bundesliga
-						if league.toPlainText().strip() in ["Bundesliga"]:
+						if league.toPlainText().strip() in ["Bundesliga", "Premier League"]:
 							print(league.toPlainText().strip())
 							self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
 							self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
@@ -178,14 +178,14 @@ class Collector(QWebPage):
 				country = country_list1.at(i).findAll("a").at(0)
 				# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
 				# Uzimamo samo Germany
-				if country.toPlainText().strip() in ["Germany"]:
+				if country.toPlainText().strip() in ["Germany", "England"]:
 
 					league_list = country_list1.at(i).findAll("ul").at(0).findAll("li")
 					for x in range(0, len(league_list)):
 						league = league_list.at(x).findAll("a").at(0)
 
 						# Uzimamo samo Bundesliga
-						if league.toPlainText().strip() in ["Bundesliga"]:
+						if league.toPlainText().strip() in ["Bundesliga", "Premier League"]:
 							print(league.toPlainText().strip())
 							self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
 							self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
@@ -386,24 +386,34 @@ class Collector(QWebPage):
 				print("JEL RADI")
 				if not allready_running:
 					print("PUSTAM")
+					cmd += " (1)"
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					time.sleep(2)
+					cmd += " (2)"
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					time.sleep(2)
+					cmd += " (3)"
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					time.sleep(2)
+					cmd += " (4)"
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					time.sleep(2)
+					cmd += " (5)"
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					time.sleep(2)
+					cmd += " (6)"
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					time.sleep(2)
+					cmd += " (7)"
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					time.sleep(2)
+					cmd += " (8)"
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					time.sleep(2)
+					cmd += " (9)"
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					time.sleep(2)
+					cmd += " (10)"
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 				else:
 					print("RADI")
