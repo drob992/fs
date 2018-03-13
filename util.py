@@ -223,18 +223,18 @@ def redis_remove_from_collection(rdb, r_key, ev_hash):
 def redis_emmit(rdb, event_hash, event, collector=None):
 	if not isinstance(event, dict):
 		event = event.__dict__
-
-	keys_to_remove = ['cache', 'timejump', 'three_time_open_event', 'node', 'packed_score']
-	for x in keys_to_remove:
-		if x in list(event.keys()):
-			del event[x]
-
-	for key in list(event.keys()):
-		# rdb.sadd('rle@main_obj_keys', key)
-		if key != 'odds':
-			if not validate_live_event_prop(key, str(event[key])):
-				print("\nne emitujem: {}    {}:{}    {}: -{}-      {}\n".format(event['sport'], event['team1'], event['team2'], key, str(event[key]), event_hash))
-				return
+	#
+	# keys_to_remove = ['cache', 'node', 'packed_score']
+	# for x in keys_to_remove:
+	# 	if x in list(event.keys()):
+	# 		del event[x]
+	#
+	# for key in list(event.keys()):
+	# 	# rdb.sadd('rle@main_obj_keys', key)
+	# 	if key != 'odds':
+	# 		if not validate_live_event_prop(key, str(event[key])):
+	# 			print("\nne emitujem: {}    {}:{}    {}: -{}-      {}\n".format(event['sport'], event['team1'], event['team2'], key, str(event[key]), event_hash))
+	# 			return
 
 	data = json.dumps({event_hash: event})
 	if collector:
@@ -254,7 +254,7 @@ def redis_emmit(rdb, event_hash, event, collector=None):
 	expire_key(rdb=rdb, key=redis_key, time=50)
 
 	timestamp = int(str(time.time()).split(".")[0])
-	rdb.set("tipbet_last_emmit-{}".format(event_hash), timestamp)
+	rdb.set("flashscore_last_emmit-{}".format(event_hash), timestamp)
 	return data
 
 

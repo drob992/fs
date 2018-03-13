@@ -221,6 +221,7 @@ class Collector(QWebPage):
 				if link != "https://www.flashscore.com":
 					self._frame.load(QNetworkRequest(QUrl(link+"results")))
 					# self.more = True
+					print("qwqweqweqweqweqweqweqweqweqweqweqw")
 					QTimer().singleShot(3500, self.parse_team)
 				else:
 					QTimer().singleShot(3500, self.open_leagues)
@@ -243,7 +244,7 @@ class Collector(QWebPage):
 
 				self._frame.load(QNetworkRequest(QUrl(link)))
 
-				QTimer().singleShot(3500, self.get_teams_standings)
+				QTimer().singleShot(4000, self.get_teams_standings)
 
 				break
 
@@ -265,8 +266,13 @@ class Collector(QWebPage):
 			print("EXCEPT BRE 444444444")
 
 		print(country, league_name)
+		print("stefa11", len(groups))
+		if len(groups) == 0:
+			QTimer().singleShot(1000, self.get_teams_standings)
+
 		for i in range(len(groups)):
 			teams = groups.at(i).findAll("tr")
+			print("stefa", len(teams))
 			for x in range(len(teams)):
 				team = teams.at(x).findAll("td").at(1).findAll("span").at(1).findAll("a").at(0)
 				played = teams.at(x).findAll("td").at(2).toPlainText().strip()
@@ -367,7 +373,7 @@ class Collector(QWebPage):
 			print("STVARNO")
 			if matches:
 
-				cmd = 'python3 {}classes/collector_statistics.py'.format(project_root_path)  #
+				cmd = 'xvfb-run -a python3 {}classes/collector_statistics.py'.format(project_root_path)  #
 				allready_running = None
 				pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
 				print("MAJKE MI")
@@ -435,7 +441,7 @@ class Collector(QWebPage):
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_leagues" in proces_name and '/bin/sh' not in proces_name:
-					relaunch_cmd = "python3 {}".format(proces_name[10:-2])
+					relaunch_cmd = "xvfb-run -a python3 {}".format(proces_name[10:-2])
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()
 			except IOError:

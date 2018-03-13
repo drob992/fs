@@ -315,7 +315,8 @@ class Collector(QWebPage):
 
 				self.redis.hset("!!"+self.team, self.i, json.dumps(event))
 
-				# data = util.redis_emmit(self.redis, self.team, event)
+				data = util.redis_emmit(self.redis, self.team, event, True)
+				self.log.info('Collector emmit: {}'.format(data))
 
 				self.redis.hdel(self.team, self.i)
 
@@ -346,7 +347,7 @@ class Collector(QWebPage):
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_statistics" in proces_name and str(self.order_num) in proces_name and '/bin/sh' not in proces_name:
-					relaunch_cmd = "python3 collector_statistics.py {}".format(self.order_num)
+					relaunch_cmd = "xvfb-run -a python3 collector_statistics.py {}".format(self.order_num)
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()
 			except IOError:

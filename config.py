@@ -22,12 +22,7 @@ endpoint_rdb_ch_sets = {
         'publish_ch': 'bet365_feed_local',
         'endpoint': 'http://{}/svclive/events/bet365/feed'.format(redis_admin_host),
         'hide_quotas_api': 'http://admin.sbp.dev/svclive/event/set_enable_for_betting'
-    },
-    #'staging': {
-    #    'publish_ch': 'bet365_feed_stg',
-    #    'endpoint': 'http://stg.premierbet.me/svclive/events/bet365/feed',
-    #    'hide_quotas_api': 'http://stg.premierbet.me/svclive/event/set_enable_for_betting'
-    #}
+    }
 }
 
 admin_redis_ch = 'bet365_comm_ch'
