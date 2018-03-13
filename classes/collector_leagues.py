@@ -139,53 +139,53 @@ class Collector(QWebPage):
 		country_list = main.findAll(".menu.country-list").at(2).findAll("li")
 		country_list1 = main.findAll(".menu.country-list").at(3).findAll("li")
 
-		# for i in range(1, len(country_list)):
-		# 	if country_list.at(i).hasAttribute("id"):
-		#
-		# 		# Ovde je izbacena lista "Other Competitions" (Africa, Asia, World, Europe ....)
-		# 		if country_list.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
-		# 			continue
-		#
-		# 		country = country_list.at(i).findAll("a").at(0)
-		# 		# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
-		# 		# Uzimamo samo Germany
-		# 		if country.toPlainText().strip() in ["Germany", "England"]:
-		#
-		# 			league_list = country_list.at(i).findAll("ul").at(0).findAll("li")
-		# 			for x in range(0, len(league_list)):
-		# 				league = league_list.at(x).findAll("a").at(0)
-		#
-		# 				# Uzimamo samo Bundesliga
-		# 				if league.toPlainText().strip() in ["Bundesliga", "Premier League"]:
-		# 					print(league.toPlainText().strip())
-		# 					self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
-		# 					self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
-		# 					# print(league.toPlainText().strip())
-		# 					# print("----------------------------")
-		#
-		# for i in range(0, len(country_list1)):
-		# 	if country_list1.at(i).hasAttribute("id"):
-		#
-		# 		# Ovde je izbacena lista "Other Competitions" (Africa, Asia, World, Europe ....)
-		# 		if country_list1.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
-		# 			continue
-		#
-		# 		country = country_list1.at(i).findAll("a").at(0)
-		# 		# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
-		# 		# Uzimamo samo Germany
-		# 		if country.toPlainText().strip() in ["Germany", "England"]:
-		#
-		# 			league_list = country_list1.at(i).findAll("ul").at(0).findAll("li")
-		# 			for x in range(0, len(league_list)):
-		# 				league = league_list.at(x).findAll("a").at(0)
-		#
-		# 				# Uzimamo samo Bundesliga
-		# 				if league.toPlainText().strip() in ["Bundesliga", "Premier League"]:
-		# 					print(league.toPlainText().strip())
-		# 					self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
-		# 					self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
-		# 					# print(league.toPlainText().strip())
-		# 					# print("----------------------------")
+		for i in range(1, len(country_list)):
+			if country_list.at(i).hasAttribute("id"):
+
+				# Ovde je izbacena lista "Other Competitions" (Africa, Asia, World, Europe ....)
+				if country_list.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
+					continue
+
+				country = country_list.at(i).findAll("a").at(0)
+				# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
+				# Uzimamo samo Germany
+				if country.toPlainText().strip() in ["Germany", "England"]:
+
+					league_list = country_list.at(i).findAll("ul").at(0).findAll("li")
+					for x in range(0, len(league_list)):
+						league = league_list.at(x).findAll("a").at(0)
+
+						# Uzimamo samo Bundesliga
+						if league.toPlainText().strip() in ["Bundesliga", "Premier League"]:
+							print(league.toPlainText().strip())
+							self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
+							self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
+							# print(league.toPlainText().strip())
+							# print("----------------------------")
+
+		for i in range(0, len(country_list1)):
+			if country_list1.at(i).hasAttribute("id"):
+
+				# Ovde je izbacena lista "Other Competitions" (Africa, Asia, World, Europe ....)
+				if country_list1.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
+					continue
+
+				country = country_list1.at(i).findAll("a").at(0)
+				# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
+				# Uzimamo samo Germany
+				if country.toPlainText().strip() in ["Germany", "England"]:
+
+					league_list = country_list1.at(i).findAll("ul").at(0).findAll("li")
+					for x in range(0, len(league_list)):
+						league = league_list.at(x).findAll("a").at(0)
+
+						# Uzimamo samo Bundesliga
+						if league.toPlainText().strip() in ["Bundesliga", "Premier League"]:
+							print(league.toPlainText().strip())
+							self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
+							self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
+							# print(league.toPlainText().strip())
+							# print("----------------------------")
 
 		# Posto smo gore izbacili "Other Competitions" moramo rucno dodati world_cup
 		self.redis.sadd('leagues_links', "https://www.flashscore.com/football/world/world-cup/")
@@ -261,7 +261,7 @@ class Collector(QWebPage):
 			print("EXCEPT BRE 444444444")
 
 		print(country, league_name)
-		print("stefa11", len(groups))
+		print("Groups", len(groups))
 		if len(groups) == 0:
 			if self.checker == 4:
 				self.reload_collector()
@@ -271,7 +271,7 @@ class Collector(QWebPage):
 
 		for i in range(len(groups)):
 			teams = groups.at(i).findAll("tr")
-			print("stefa", len(teams))
+			print("Teams", len(teams))
 			for x in range(len(teams)):
 				team = teams.at(x).findAll("td").at(1).findAll("span").at(1).findAll("a").at(0)
 				played = teams.at(x).findAll("td").at(2).toPlainText().strip()
