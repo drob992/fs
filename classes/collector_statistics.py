@@ -38,7 +38,6 @@ class Collector(QWebPage):
 
 		self.EVENT = None
 
-		# available events redis key
 		self.redis = redis.StrictRedis(host='localhost', port=redis_master_port, decode_responses=True, password=redis_pass)
 
 		self._url = QUrl(page_link)
@@ -53,7 +52,6 @@ class Collector(QWebPage):
 		self._req.setRawHeader(b"Upgrade-Insecure-Requests", b"1")
 		self._req.setRawHeader(b"Pragma", b"no-cache")
 		self._req.setRawHeader(b"X-Requested-With", b"XMLHttpRequest")
-		# self._req.setRawHeader(b"Cookie", util.generate_cookie())
 
 		self._frame = self.currentFrame()
 		self._frame.load(self._req)
@@ -95,10 +93,6 @@ class Collector(QWebPage):
 
 	@pyqtSlot()
 	def read_page(self):
-		"""
-		:description:
-		:return:
-		"""
 
 		if self.first_load:
 
@@ -108,7 +102,6 @@ class Collector(QWebPage):
 
 			QTimer().singleShot(2000, self.match_statistics)
 			self.first_load = False
-
 
 	def check_hash(self):
 
@@ -137,8 +130,6 @@ class Collector(QWebPage):
 
 	def match_statistics(self):
 
-		# self.statistics.stop()
-		# print("ppppppppppppppppppppppppppppp")
 		team_names = self.redis.smembers("team_names")
 		# print(len(team_names), "stefan 11111")
 
@@ -175,6 +166,7 @@ class Collector(QWebPage):
 						break
 
 					self.redis.hset("processed", team, i)
+					self.redis.expire("processed", 10)
 
 					match = json.loads(matches[i])
 
@@ -308,23 +300,23 @@ class Collector(QWebPage):
 			try:
 				event = json.loads(self.redis.hget(self.team, self.i))
 
-				self.redis.hset("@@"+self.team, self.i, json.dumps(event))
+				self.redis.hset("old-"+self.team, self.i, json.dumps(event))
 
 				event["statistics"] = statistics
 				event["summary"] = summary
 
-				self.redis.hset("!!"+self.team, self.i, json.dumps(event))
+				self.redis.hset("new-"+self.team, self.i, json.dumps(event))
 
-				data = util.redis_emmit(self.redis, self.team, event, True)
-				self.log.info('Collector emmit: {}'.format(data))
+				# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				# data = util.redis_emmit(self.redis, self.team, event, True)
+				# self.log.info('Collector emmit: {}'.format(data))
+				# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 				self.redis.hdel(self.team, self.i)
 
 				self.resourse_check()
 				self.summary_click = True
 				QTimer().singleShot(2000, self.match_statistics)
-				# print("TA TA TA TIRA")
-				#dodaj statistiku u redis
 			except Exception as e:
 				print("Doslo je do otvaranja istog eventa u 2 prozora, vec je upisan", self.team, self.i, "--", e)
 				self.redis.hdel("processed", self.team, self.i)
@@ -339,7 +331,6 @@ class Collector(QWebPage):
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			self.reload_collector()
 			print("Presao limit\norder_num = ", self.order_num)
-		# print("BAZINGA")
 
 	def reload_collector(self):
 		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
@@ -359,7 +350,7 @@ if __name__ == "__main__":
 	order_num = sys.argv[-1]
 
 	collector_log = util.parserLog('/var/log/sbp/flashscores/collector_statistics.log', 'flashscore-collector')
-	# todo: if gui in sys.argv True
+
 	app = QApplication(sys.argv)
 	web = QWebView()
 	webpage = Collector(parent=web, page_link=common.live_link, debug=True, logger=collector_log, order_num=order_num)

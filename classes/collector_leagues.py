@@ -37,7 +37,6 @@ class Collector(QWebPage):
 
 		self.EVENT = None
 
-		# available events redis key
 		self.redis = redis.StrictRedis(host='localhost', port=redis_master_port, decode_responses=True, password=redis_pass)
 
 		self._url = QUrl(page_link)
@@ -52,7 +51,6 @@ class Collector(QWebPage):
 		self._req.setRawHeader(b"Upgrade-Insecure-Requests", b"1")
 		self._req.setRawHeader(b"Pragma", b"no-cache")
 		self._req.setRawHeader(b"X-Requested-With", b"XMLHttpRequest")
-		# self._req.setRawHeader(b"Cookie", util.generate_cookie())
 
 		self._frame = self.currentFrame()
 		self._frame.load(self._req)
@@ -80,6 +78,8 @@ class Collector(QWebPage):
 		# connect signals and slots
 		self.loadFinished.connect(self.read_page)
 
+		self.checker = 0
+
 		if self.debug:
 			self.log.info("Flashscore parser started, with headers: ")
 			for hd in self._req.rawHeaderList():
@@ -89,10 +89,6 @@ class Collector(QWebPage):
 
 	@pyqtSlot()
 	def read_page(self):
-		"""
-		:description:
-		:return:
-		"""
 
 		if self.first_load:
 
@@ -134,7 +130,6 @@ class Collector(QWebPage):
 
 		print("11111111111!!!!!!!!!!!!!!!!!!!")
 
-
 	def get_league_links(self):
 
 		print("22222222222222222")
@@ -144,53 +139,53 @@ class Collector(QWebPage):
 		country_list = main.findAll(".menu.country-list").at(2).findAll("li")
 		country_list1 = main.findAll(".menu.country-list").at(3).findAll("li")
 
-		for i in range(1, len(country_list)):
-			if country_list.at(i).hasAttribute("id"):
-
-				# Ovde je izbacena lista "Other Competitions" (Africa, Asia, World, Europe ....)
-				if country_list.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
-					continue
-
-				country = country_list.at(i).findAll("a").at(0)
-				# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
-				# Uzimamo samo Germany
-				if country.toPlainText().strip() in ["Germany", "England"]:
-
-					league_list = country_list.at(i).findAll("ul").at(0).findAll("li")
-					for x in range(0, len(league_list)):
-						league = league_list.at(x).findAll("a").at(0)
-
-						# Uzimamo samo Bundesliga
-						if league.toPlainText().strip() in ["Bundesliga", "Premier League"]:
-							print(league.toPlainText().strip())
-							self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
-							self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
-							# print(league.toPlainText().strip())
-							# print("----------------------------")
-
-		for i in range(0, len(country_list1)):
-			if country_list1.at(i).hasAttribute("id"):
-
-				# Ovde je izbacena lista "Other Competitions" (Africa, Asia, World, Europe ....)
-				if country_list1.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
-					continue
-
-				country = country_list1.at(i).findAll("a").at(0)
-				# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
-				# Uzimamo samo Germany
-				if country.toPlainText().strip() in ["Germany", "England"]:
-
-					league_list = country_list1.at(i).findAll("ul").at(0).findAll("li")
-					for x in range(0, len(league_list)):
-						league = league_list.at(x).findAll("a").at(0)
-
-						# Uzimamo samo Bundesliga
-						if league.toPlainText().strip() in ["Bundesliga", "Premier League"]:
-							print(league.toPlainText().strip())
-							self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
-							self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
-							# print(league.toPlainText().strip())
-							# print("----------------------------")
+		# for i in range(1, len(country_list)):
+		# 	if country_list.at(i).hasAttribute("id"):
+		#
+		# 		# Ovde je izbacena lista "Other Competitions" (Africa, Asia, World, Europe ....)
+		# 		if country_list.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
+		# 			continue
+		#
+		# 		country = country_list.at(i).findAll("a").at(0)
+		# 		# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
+		# 		# Uzimamo samo Germany
+		# 		if country.toPlainText().strip() in ["Germany", "England"]:
+		#
+		# 			league_list = country_list.at(i).findAll("ul").at(0).findAll("li")
+		# 			for x in range(0, len(league_list)):
+		# 				league = league_list.at(x).findAll("a").at(0)
+		#
+		# 				# Uzimamo samo Bundesliga
+		# 				if league.toPlainText().strip() in ["Bundesliga", "Premier League"]:
+		# 					print(league.toPlainText().strip())
+		# 					self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
+		# 					self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
+		# 					# print(league.toPlainText().strip())
+		# 					# print("----------------------------")
+		#
+		# for i in range(0, len(country_list1)):
+		# 	if country_list1.at(i).hasAttribute("id"):
+		#
+		# 		# Ovde je izbacena lista "Other Competitions" (Africa, Asia, World, Europe ....)
+		# 		if country_list1.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
+		# 			continue
+		#
+		# 		country = country_list1.at(i).findAll("a").at(0)
+		# 		# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
+		# 		# Uzimamo samo Germany
+		# 		if country.toPlainText().strip() in ["Germany", "England"]:
+		#
+		# 			league_list = country_list1.at(i).findAll("ul").at(0).findAll("li")
+		# 			for x in range(0, len(league_list)):
+		# 				league = league_list.at(x).findAll("a").at(0)
+		#
+		# 				# Uzimamo samo Bundesliga
+		# 				if league.toPlainText().strip() in ["Bundesliga", "Premier League"]:
+		# 					print(league.toPlainText().strip())
+		# 					self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
+		# 					self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
+		# 					# print(league.toPlainText().strip())
+		# 					# print("----------------------------")
 
 		# Posto smo gore izbacili "Other Competitions" moramo rucno dodati world_cup
 		self.redis.sadd('leagues_links', "https://www.flashscore.com/football/world/world-cup/")
@@ -220,7 +215,6 @@ class Collector(QWebPage):
 				print(link+"results")
 				if link != "https://www.flashscore.com":
 					self._frame.load(QNetworkRequest(QUrl(link+"results")))
-					# self.more = True
 					print("qwqweqweqweqweqweqweqweqweqweqweqw")
 					QTimer().singleShot(3500, self.parse_team)
 				else:
@@ -236,9 +230,10 @@ class Collector(QWebPage):
 			for link in league_links:
 
 				self.redis.srem("leagues_links", link)
-
+				print(link.lower())
+				print(">>>>>>>>>>>>>>>>>>>>>>>>>>")
 				# Izbacujemo kupove za sada, potrebni drugacije parsiranje :D
-				if "cup" in link.lower() or "offs" in link.lower():
+				if "cup" in link.lower() and link.lower() != "https://www.flashscore.com/football/world/world-cup/" or "offs" in link.lower():
 					QTimer().singleShot(3000, self.open_leagues)
 					continue
 
@@ -268,7 +263,11 @@ class Collector(QWebPage):
 		print(country, league_name)
 		print("stefa11", len(groups))
 		if len(groups) == 0:
-			QTimer().singleShot(1000, self.get_teams_standings)
+			if self.checker == 4:
+				self.reload_collector()
+			else:
+				self.checker += 1
+				QTimer().singleShot(1000, self.get_teams_standings)
 
 		for i in range(len(groups)):
 			teams = groups.at(i).findAll("tr")
@@ -296,20 +295,6 @@ class Collector(QWebPage):
 		tr = None
 		team_name = None
 
-		# if self.more:
-		# 	print("5555555555@@@@@@@@@@@@@@@@@@@")
-		# 	self.more = False
-		# 	try:
-		# 		load_more = self._frame.findFirstElement("#participant-page-results-more")
-		# 		util.simulate_click(load_more.findAll("a").at(0))
-		# 		print("5555555555###################################################")
-		# 		QTimer().singleShot(3500, self.parse_team)
-		# 	except:
-		# 		print("EXCEPT BRE open_team11")
-		# 		QTimer().singleShot(1000, self.parse_team)
-		#
-		# else:
-
 		main = self._frame.findFirstElement("#main")
 		try:
 			country = main.findAll(".tournament").at(0).findAll("a").at(1).toPlainText().strip()
@@ -322,14 +307,8 @@ class Collector(QWebPage):
 		except:
 			print("EXCEPT BRE open_team22")
 
-
 		country_part = None
 		tournament_part = None
-		time = None
-		home = None
-		away = None
-		score = None
-		win_lose = None
 
 		for x in range(len(tr)):
 
@@ -355,7 +334,6 @@ class Collector(QWebPage):
 
 						print(country_part, tournament_part)
 						print(time, " - ", home, " - ", away, " - ", score, " - ", win_lose, " - ", id)
-
 
 		self.redis.sadd("team_names", team_name)
 		self.resourse_check()
