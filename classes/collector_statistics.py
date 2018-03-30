@@ -338,7 +338,7 @@ class Collector(QWebPage):
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_statistics" in proces_name and str(self.order_num) in proces_name and '/bin/sh' not in proces_name:
-					relaunch_cmd = "xvfb-run -a python3 collector_statistics.py {}".format(self.order_num)
+					relaunch_cmd = "python3 collector_statistics.py {}".format(self.order_num)
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()
 			except IOError:
