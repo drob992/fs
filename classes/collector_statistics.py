@@ -349,7 +349,7 @@ if __name__ == "__main__":
 
 	order_num = sys.argv[-1]
 
-	collector_log = util.parserLog('/var/log/sbp/flashscores/collector_statistics.log', 'flashscore-collector')
+	collector_log = util.parserLog('/var/log/sbp/flashscore/collector_statistics.log', 'flashscore-collector')
 
 	app = QApplication(sys.argv)
 	web = QWebView()

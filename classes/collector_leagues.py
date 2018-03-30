@@ -428,7 +428,7 @@ class Collector(QWebPage):
 
 if __name__ == "__main__":
 
-	collector_log = util.parserLog('/var/log/sbp/flashscores/collector_leagues.log', 'flashscore-collector')
+	collector_log = util.parserLog('/var/log/sbp/flashscore/collector_leagues.log', 'flashscore-collector')
 	# todo: if gui in sys.argv True
 	app = QApplication(sys.argv)
 	web = QWebView()

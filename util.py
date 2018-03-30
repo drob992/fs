@@ -118,7 +118,7 @@ def open_single_event(ev_hash, ev_sport):
 
 
 def sync(endpoint=None, redis_ch=None, endpoint_name=None):
-	logger = parserLog('/var/log/sbp/flashscores/enqueuer_{}.log'.format(endpoint_name), 'enq-logger-{}'.format(endpoint_name))
+	logger = parserLog('/var/log/sbp/flashscore/enqueuer_{}.log'.format(endpoint_name), 'enq-logger-{}'.format(endpoint_name))
 	check_for_emmits_interval = .1
 	r_server = redis.StrictRedis(host='localhost', port=config.redis_master_port, decode_responses=True, password=config.redis_pass)
 
@@ -290,7 +290,7 @@ def node_open_event(redis, sport, hash):
 		node_cmd_ch = get_curr_node_channels(rdb=redis, ev_hash=hash, key='commands')
 		redis.lpush(node_cmd_ch, node_open_e_message)
 	except Exception as e:
-		logger_filepath = '/var/log/sbp/flashscores/catched_errors.log'
+		logger_filepath = '/var/log/sbp/flashscore/catched_errors.log'
 		error_logger = parserLog(logger_filepath, 'tipbet-live-errors')
 		error_logger.critical(e)
 

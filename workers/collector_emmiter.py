@@ -9,8 +9,8 @@ from config import redis_master_port, redis_pass, endpoint_rdb_ch_sets
 
 
 rdb = redis.StrictRedis(host='localhost', port=redis_master_port, decode_responses=True, password=redis_pass)
-diff_logger = util.parserLog('/var/log/sbp/flashscores/diff_logger.log', 'bet356live-single')
-err_logger = util.parserLog('/var/log/sbp/flashscores/collector_emmiter.log', 'bet356live-collector-emmiter')
+diff_logger = util.parserLog('/var/log/sbp/flashscore/diff_logger.log', 'bet356live-single')
+err_logger = util.parserLog('/var/log/sbp/flashscore/collector_emmiter.log', 'bet356live-collector-emmiter')
 
 if __name__ == '__main__':
 

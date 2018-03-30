@@ -7,7 +7,7 @@ from config import *
 import common
 import util
 
-command_listener_log = util.parserLog('/var/log/sbp/flashscores/command_listener.log', 'bet356live-info')
+command_listener_log = util.parserLog('/var/log/sbp/flashscore/command_listener.log', 'bet356live-info')
 
 #ZA SADA POSTOJI SAMO ZA KOLEKTOR
 

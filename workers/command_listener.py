@@ -61,7 +61,7 @@ if __name__ == '__main__':
 	# if hostname in common.master_servers and not util.check_local_dev():
 	#
 	# 	# todo:
-	# 	logger_filepath = '/var/log/sbp/flashscores/m_controller.log'
+	# 	logger_filepath = '/var/log/sbp/flashscore/m_controller.log'
 	# 	controller_logger = util.parserLog(logger_filepath, 'tip_bet-command_listener.py-controller')
 	# 	controller = controller.MasterController(log=controller_logger)
 	# 	admin_messages = redis.StrictRedis(host=redis_admin_host, port=redis_admin_port, decode_responses=True, password=redis_pass)
@@ -145,7 +145,7 @@ if __name__ == '__main__':
 	# 			this_node = node
 	# 			break
 	#
-	# 	logger_filepath = '/var/log/sbp/flashscores/controller_{}.log'.format(this_node['id'])
+	# 	logger_filepath = '/var/log/sbp/flashscore/controller_{}.log'.format(this_node['id'])
 	# 	controller_logger = util.parserLog(logger_filepath, 'tip_bet-node-controller')
 	# 	controller = controller.SlaveController(log=controller_logger)
 	# 	commands_ch = this_node['r_channels']['commands']
@@ -175,7 +175,7 @@ if __name__ == '__main__':
 	# 						ev_sport = command_split[1]
 	# 					ev_hash = command_split[2]
 	#
-	# 					single_log_loc = '/var/log/sbp/flashscores/single_{}.log'.format(ev_hash)
+	# 					single_log_loc = '/var/log/sbp/flashscore/single_{}.log'.format(ev_hash)
 	# 					single_log = util.parserLog(single_log_loc, 'tip_bet-info')
 	#
 	# 					controller.exec_event_command(cmd, ev_hash, ev_sport, single_log)
@@ -189,7 +189,7 @@ if __name__ == '__main__':
 	#
 	# 					if cmd in common.available_commands['tools']:
 	#
-	# 						log_file_path = "/var/log/sbp/flashscores/single_{}.log".format(ev_hash)
+	# 						log_file_path = "/var/log/sbp/flashscore/single_{}.log".format(ev_hash)
 	#
 	# 		controller.node_status()
 	#
@@ -200,7 +200,7 @@ if __name__ == '__main__':
 	print("localhost development")
 
 	# master cmd listener init
-	logger_filepath = '/var/log/sbp/flashscores/m_controller.log'
+	logger_filepath = '/var/log/sbp/flashscore/m_controller.log'
 	m_controller_logger = util.parserLog(logger_filepath, 'tip_bet-command_listener.py-controller')
 	m_controller = controller.MasterController(log=m_controller_logger)
 	admin_messages = redis.StrictRedis(host=redis_admin_host, port=redis_admin_port, decode_responses=True, password=redis_pass)
@@ -208,7 +208,7 @@ if __name__ == '__main__':
 
 	# slave cmd listener init
 	this_node = nodes[0]
-	logger_filepath = '/var/log/sbp/flashscores/controller_{}.log'.format(this_node['id'])
+	logger_filepath = '/var/log/sbp/flashscore/controller_{}.log'.format(this_node['id'])
 	s_controller_logger = util.parserLog(logger_filepath, 'tip_bet-node-controller')
 	s_controller = controller.SlaveController(log=s_controller_logger)
 	commands_ch = this_node['r_channels']['commands']
@@ -310,7 +310,7 @@ if __name__ == '__main__':
 						ev_sport = command_split[1]
 					ev_hash = command_split[2]
 
-					single_log_loc = '/var/log/sbp/flashscores/single_{}.log'.format(ev_hash)
+					single_log_loc = '/var/log/sbp/flashscore/single_{}.log'.format(ev_hash)
 					single_log = util.parserLog(single_log_loc, 'tip_bet-info')
 
 					s_controller.exec_event_command(cmd, ev_hash, ev_sport, single_log)

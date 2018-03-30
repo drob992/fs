@@ -15,7 +15,7 @@ import redis
 if __name__ == '__main__':
 	if hostname in common.master_servers and not util.check_local_dev():
 
-		command_listener_log = util.parserLog('/var/log/sbp/flashscores/command_listener.log', 'bet356live-info')
+		command_listener_log = util.parserLog('/var/log/sbp/flashscore/command_listener.log', 'bet356live-info')
 
 		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
 		for pid in pids:
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 		# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 	elif hostname in common.node_servers and not util.check_local_dev():
 
-		log_file_loc = '/var/log/sbp/flashscores/command_listener.log'
+		log_file_loc = '/var/log/sbp/flashscore/command_listener.log'
 		command_listener_log = util.parserLog(log_file_loc, 'bet356live-info')
 
 		this_node = None
@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
 		time.sleep(.2)
 
-		m_command_listener_log = util.parserLog('/var/log/sbp/flashscores/command_listener.log', 'bet356live-info')
+		m_command_listener_log = util.parserLog('/var/log/sbp/flashscore/command_listener.log', 'bet356live-info')
 
 		hostname = socket.gethostname()
 
@@ -152,7 +152,7 @@ if __name__ == '__main__':
 		# #subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 		#
 		# # node
-		# log_file_loc = '/var/log/sbp/flashscores/command_listener.log'
+		# log_file_loc = '/var/log/sbp/flashscore/command_listener.log'
 		# s_command_listener_log = util.parserLog(log_file_loc, 'bet356live-info')
 		#
 		# this_node = nodes[0]

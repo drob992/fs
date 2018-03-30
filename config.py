@@ -3,7 +3,7 @@ import socket
 
 hostname = socket.gethostname()
 
-project_root_path = '/home/stex92/work/flashscores/'
+project_root_path = '/home/stex92/work/flashscore/'
 if hostname == "www-desktop":
     redis_master_host = '192.168.1.5'
 elif hostname == "www-desktop":
