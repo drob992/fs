@@ -1,24 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6dff6a00-5f10-4878-b804-abd85c7ee666" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/README.md" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/classes/__init__.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/classes/collector_leagues.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/classes/collector_statistics.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/classes/controller.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/classes/live_collector.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/common.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/config.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/starter.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/stop.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/util.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/workers/__init__.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/workers/collector_emmiter.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/workers/command_listener.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/workers/enqueuer.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/workers/process_checker.py" afterPath="" />
-    </list>
+    <list default="true" id="6dff6a00-5f10-4878-b804-abd85c7ee666" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -46,8 +29,42 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="service.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="service.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/service.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="72">
+              <caret line="4" column="8" lean-forward="false" selection-start-line="4" selection-start-column="4" selection-end-line="4" selection-end-column="8" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="utilities.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/utilities.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="queries.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/queries.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="376">
+              <caret line="28" column="0" lean-forward="true" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+              <folding>
+                <marker date="1522933110000" expanded="true" signature="313:331" ph="select missi... missing_value" />
+                <marker date="1522933110000" expanded="true" signature="533:562" ph="insert into missing_value... " />
+                <marker date="1522933110000" expanded="true" signature="995:1009" ph="update missi... " />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="__init_.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/__init_.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
               <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -480,7 +497,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="30" width="1920" height="1050" extended-state="0" />
+    <frame x="0" y="30" width="1920" height="1050" extended-state="1" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -516,9 +533,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/common.py" />
-    <entry file="file://$PROJECT_DIR$/classes/collector_leagues.py" />
-    <entry file="file://$PROJECT_DIR$/util.py" />
     <entry file="file://$USER_HOME$/.PyCharm2016.3/system/python_stubs/-1247971764/PyQt5/QtCore/QTimer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="702">
@@ -628,11 +642,39 @@
     <entry file="file://$PROJECT_DIR$/classes/collector_statistics.py" />
     <entry file="file://$PROJECT_DIR$/classes/collector_leagues.py" />
     <entry file="file://$PROJECT_DIR$/classes/live_collector.py" />
-    <entry file="file://$PROJECT_DIR$/service.py">
+    <entry file="file://$PROJECT_DIR$/__init_.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utilities.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72">
+          <caret line="4" column="8" lean-forward="false" selection-start-line="4" selection-start-column="4" selection-end-line="4" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/queries.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="376">
+          <caret line="28" column="0" lean-forward="true" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+          <folding>
+            <marker date="1522933110000" expanded="true" signature="313:331" ph="select missi... missing_value" />
+            <marker date="1522933110000" expanded="true" signature="533:562" ph="insert into missing_value... " />
+            <marker date="1522933110000" expanded="true" signature="995:1009" ph="update missi... " />
+          </folding>
         </state>
       </provider>
     </entry>
