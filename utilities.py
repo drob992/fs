@@ -6,7 +6,7 @@ _DB_PASSWORD = 'pr3mi3r'
 _DB_USE_UNICODE = False
 _DB_CHARSET = 'utf8'
 
-__mysql = None
+__mysql = {}
 def get_mysql_db(db_name, host=_DB_HOST, user=_DB_USERNAME, passwd=_DB_PASSWORD, use_unicode=_DB_USE_UNICODE, charset=_DB_CHARSET):
 	global __mysql
 	
@@ -27,6 +27,7 @@ def get_mysql_db(db_name, host=_DB_HOST, user=_DB_USERNAME, passwd=_DB_PASSWORD,
 	except MySQLdb.OperationalError as e:
 		if len(e.args) == 2 and e.args[0] == 2006 and e.args[1] == 'MySQL server has gone away':
 			__mysql[db_name] = conn_to_db()
+
 	return __mysql[db_name]
 
 
