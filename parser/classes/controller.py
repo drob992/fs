@@ -158,7 +158,7 @@ class MasterController(object):
 			for endpoint_ in endpoint_rdb_ch_sets:
 				self.redis.ltrim(endpoint_rdb_ch_sets[endpoint_]['publish_ch'], 0, 0)
 
-			cmd_proc = "python3 {}stop.py".format(project_root_path)
+			cmd_proc = "python3 {}parser/stop.py".format(project_root_path)
 			subprocess.Popen(shlex.split(cmd_proc), stderr=None, stdout=None)
 			time.sleep(1)
 			cmd_proc = "python3 {}starter.py".format(project_root_path)
@@ -182,7 +182,7 @@ class MasterController(object):
 								print("ovaj je u removed: {}".format(ev_hash))
 
 			time.sleep(5)
-			cmd_proc = "python3 {}stop.py".format(project_root_path)
+			cmd_proc = "python3 {}parser/stop.py".format(project_root_path)
 			subprocess.Popen(shlex.split(cmd_proc), stderr=None, stdout=None)
 			self.redis.delete('events_resent')
 			self.redis.delete(common.redis_channels['singles_stop'])
@@ -307,14 +307,14 @@ class SlaveController(object):
 	def exec_sys_command(command):
 
 		if command == 'start':
-			cmd_proc = "python3 {}stop.py".format(project_root_path)
+			cmd_proc = "python3 {}parser/stop.py".format(project_root_path)
 			subprocess.Popen(shlex.split(cmd_proc), stderr=None, stdout=None)
 			time.sleep(1.5)
 			cmd_proc = "python3 {}starter.py".format(project_root_path)
 			subprocess.Popen(shlex.split(cmd_proc), stderr=None, stdout=None)
 		elif command == 'forced':
 
-			cmd_proc = "python3 {}stop.py".format(project_root_path)
+			cmd_proc = "python3 {}parser/stop.py".format(project_root_path)
 			subprocess.Popen(shlex.split(cmd_proc), stderr=None, stdout=None)
 
 	def exec_event_command(self, command, ev_hash, ev_sport, single_log):

@@ -135,8 +135,8 @@ class Collector(QWebPage):
 
 		if len(team_names) == 0:
 			print(len(team_names), "stefan 11111")
-
-			cmd = 'python3 {}stop.py'.format(project_root_path)
+			time.sleep(5)
+			cmd = 'python3 {}parser/stop.py'.format(project_root_path)
 			subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 			QTimer().singleShot(30000, self.match_statistics)
 

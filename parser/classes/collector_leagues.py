@@ -188,8 +188,8 @@ class Collector(QWebPage):
 							# print("----------------------------")
 
 		# Posto smo gore izbacili "Other Competitions" moramo rucno dodati world_cup
-		self.redis.sadd('leagues_links', "https://www.flashscore.com/football/world/world-cup/")
-		self.redis.sadd('leagues', "world-cup")
+		# self.redis.sadd('leagues_links', "https://www.flashscore.com/football/world/world-cup/")
+		# self.redis.sadd('leagues', "world-cup")
 
 		print("222222222!!!!!!!!!!!!!!!!!!")
 		QTimer().singleShot(3000, self.open_leagues)
@@ -252,11 +252,13 @@ class Collector(QWebPage):
 		groups = None
 		league_name = None
 		country = None
+		year = None
 		try:
 			main = self._frame.findFirstElement("#main")
 			groups = main.findAll(".stats-table-container").at(0).findAll("tbody")
 			country = main.findAll(".tournament").at(0).findAll("a").at(1).toPlainText().strip()
 			league_name = main.findAll('.tournament-name').at(0).toPlainText().strip()
+			year = main.findAll('.tournament').at(0).toPlainText().strip().split(" » ")[-1]
 		except:
 			print("EXCEPT BRE 444444444")
 
@@ -283,6 +285,8 @@ class Collector(QWebPage):
 
 				link_for_team = team.attribute("onclick").replace("javascript:getUrlByWinType('", "").replace("');", "")
 				self.redis.sadd("team_links", "https://www.flashscore.com{}".format(link_for_team))
+				self.redis.hset("standings-%s" % league_name, team.toPlainText().strip(), {"country":country, "league_name":league_name, "team":team.toPlainText().strip(), "played":played, "wins":wins, "draws":draws, "losses":losses, "goals":goals, "points":points, "year": year})
+				print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 				print(team.toPlainText(), played, wins, draws, losses, goals, points)
 
 		print("44444444444!!!!!!!!!!!!!!!!!!")
@@ -294,6 +298,7 @@ class Collector(QWebPage):
 
 		tr = None
 		team_name = None
+		country =None
 
 		main = self._frame.findFirstElement("#main")
 		try:
@@ -328,14 +333,19 @@ class Collector(QWebPage):
 				if team_name != None:
 					if "2016" not in time and "2015" not in time and "2014" not in time and "2013" not in time and "2012" not in time and "2011" not in time and "2010" not in time and "2009" not in time:
 						# event = time, " - ", home, " - ", away, " - ", score, " - ", win_lose, " - ", country_part, tournament_part, " - ", id
-						event = {"id":x, "time":time, "home":home, "away":away, "score":score, "win_lose":win_lose, "country_part":country_part, "tournament_part":tournament_part, "flashscore_id":id}
+						event = {"id":x, "sport":"Football", "time":time, "home":home, "away":away, "score":score, "win_lose":win_lose, "country":country, "country_part":country_part, "tournament_part":tournament_part, "flashscore_id":id}
 
-						self.redis.hset(team_name, x, json.dumps(event))
+						if country.title().replace(":","").replace(" ", "") == country_part.title().replace(":","").replace(" ", "") and team_name == "Bayern Munich":
+							self.redis.hset(team_name, x, json.dumps(event))
 
 						print(country_part, tournament_part)
 						print(time, " - ", home, " - ", away, " - ", score, " - ", win_lose, " - ", id)
 
-		self.redis.sadd("team_names", team_name)
+		print(team_name)
+		if team_name == "Bayern Munich":
+			print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
+			self.redis.sadd("team_names", team_name)
+
 		self.resourse_check()
 		QTimer().singleShot(3000, self.open_leagues)
 		print("555555555555555!!!!!!!!!!!!!!!!!!")
@@ -351,7 +361,7 @@ class Collector(QWebPage):
 			print("STVARNO")
 			if matches:
 
-				cmd = 'python3 {}classes/collector_statistics.py'.format(project_root_path)  #
+				cmd = 'python3 {}parser/classes/collector_statistics.py'.format(project_root_path)  #
 				allready_running = None
 				pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
 				print("MAJKE MI")
