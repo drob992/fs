@@ -18,7 +18,7 @@ def fetch(tbl_name, fields=None, where=None):
 	# print(("-------- select {} from {} {}".format(fields, tbl_name, _where_tpl)))
 	__cursor.execute("select {} from {} {}".format(fields, tbl_name, _where_tpl))
 	for row in __cursor.fetchall():
-		response.append(row[0])
+		response.append(row)
 	return response
 
 
@@ -28,6 +28,9 @@ def save(tbl_name, payload):
 	__cursor.execute("insert into {}({}) values({})".format(tbl_name, ','.join(payload.keys()), ','.join(map(utilities.stringify, payload.values()))))
 	__connection.commit()
 
+	__cursor.execute("select * from {} order by id desc limit 1".format(tbl_name))
+
+	return __cursor.fetchone()
 
 def update(tbl_name, payload, where=None):
 	# spoji argumente
@@ -49,7 +52,7 @@ def update(tbl_name, payload, where=None):
 
 if __name__ == '__main__':
 	pass
-	# save(tbl_name='countries', payload={'name': 'Serbia'})
+	# print(save(tbl_name='countries', payload={'name': 'Serbia1'}))
 	#
 	# update(tbl_name='countries', payload={'name': 'Srbija'}, where='id=5')
 	#
