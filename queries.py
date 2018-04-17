@@ -24,7 +24,7 @@ def fetch(tbl_name, fields=None, where=None):
 
 def save(tbl_name, payload):
 	__cursor = __connection.cursor()
-	print("-------- insert into {}({}) values({})".format(tbl_name, ','.join(payload.keys()), ','.join(map(utilities.stringify, payload.values()))))
+	# print("-------- insert into {}({}) values({})".format(tbl_name, ','.join(payload.keys()), ','.join(map(utilities.stringify, payload.values()))))
 	__cursor.execute("insert into {}({}) values({})".format(tbl_name, ','.join(payload.keys()), ','.join(map(utilities.stringify, payload.values()))))
 	__connection.commit()
 
@@ -45,7 +45,7 @@ def update(tbl_name, payload, where=None):
 		_update_tpl += ' where ' + where
 		
 	__cursor = __connection.cursor()
-	print("-------- update {} set {} ".format(tbl_name, _update_tpl))
+	# print("-------- update {} set {} ".format(tbl_name, _update_tpl))
 	__cursor.execute("update {} set {} ".format(tbl_name, _update_tpl))
 	__connection.commit()
 

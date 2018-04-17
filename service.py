@@ -5,52 +5,88 @@ import redis
 import datetime
 
 from parser.config import *
-import parser.common
 
 
 def insert_countries(country):
 	try:
-		queries.save("countries", {"name": country})
-		print("Success saving country " + country)
+
+		country_id = queries.fetch("countries", ["id"], "name='%s'" % country)
+		if not country_id:
+			queries.save("countries", {"name": country})
+			print("Success saving country " + country, "\n")
+		else:
+			pass
+			# print("Country alewady exists")
+
 	except Exception as e:
-		print("GRESKA - insert_countries - ",  e, "\n")
+		print("\nGRESKA - insert_countries - ",  e, "\n")
+
 
 def insert_teams(country, team):
 	try:
 		id_country = queries.fetch("countries", ["id"], "name='%s'" % country)[0][0]
 
-		queries.save("teams", {"id_country": id_country, "name": team})
+		team_id = queries.fetch("teams", ["id"], "name='{}' and id_country='{}'".format(team, id_country))
 
-		print("Success saving team " + team)
+		if not team_id:
+			queries.save("teams", {"id_country": id_country, "name": team})
+			print("Success saving team " + team, "\n")
+		else:
+			pass
+			# print("Team alewady exists")
+
+
 	except Exception as e:
-		print("GRESKA - insert_teams - ",  e, "\n")
+		print("\nGRESKA - insert_teams - ",  e, "\n")
+
 
 def insert_types(competition_type):
 	try:
-		queries.save("competition_types", {"name": competition_type})
-		print("Success saving competition_type " + competition_type)
+		competition_type_id = queries.fetch("competition_types", ["id"], "name='%s'" % competition_type)
+
+		if not competition_type_id:
+			queries.save("competition_types", {"name": competition_type})
+			print("Success saving competition_type " + competition_type, "\n")
+		else:
+			pass
+			# print("Competition type alewady exists")
+
 	except Exception as e:
-		print("GRESKA - insert_types - ",  e, "\n")
+		print("\nGRESKA - insert_types - ",  e, "\n")
+
 
 def insert_competition_organisers(competition_type, competition_organiser):
 	try:
 		id_competition_type = queries.fetch("competition_types", ["id"], "name='%s'" % competition_type)[0][0]
 
-		queries.save("competition_organisers", {"id_competition_type": id_competition_type, "name": competition_organiser})
+		competition_organiser_id = queries.fetch("competition_organisers", ["id"], "name='{}' and id_competition_type='{}'".format(competition_organiser, id_competition_type))
 
-		print("Success saving competition_organiser " + competition_organiser)
+		if not competition_organiser_id:
+			queries.save("competition_organisers", {"id_competition_type": id_competition_type, "name": competition_organiser})
+			print("Success saving competition_organiser " + competition_organiser, "\n")
+		else:
+			pass
+			# print("competition_organiser alewady exists")
+
 	except Exception as e:
-		print("GRESKA - insert_competition_organisers - ",  e, "\n")
+		print("\nGRESKA - insert_competition_organisers - ",  e, "\n")
+
 
 def insert_competitions(competition_organiser, competition):
 	try:
 		id_competition_organiser = queries.fetch("competition_organisers", ["id"], "name='%s'" % competition_organiser)[0][0]
 
-		queries.save("competitions", {"id_competition_organiser": id_competition_organiser, "name": competition})
+		competition_id = queries.fetch("competitions", ["id"], "name='{}' and id_competition_organiser='{}'".format(competition, id_competition_organiser))
 
-		print("Success saving competition " + competition)
+		if not competition_id:
+			queries.save("competitions", {"id_competition_organiser": id_competition_organiser, "name": competition})
+			print("Success saving competition " + competition, "\n")
+		else:
+			pass
+			# print("competition alewady exists")
+
 	except Exception as e:
-		print("GRESKA - insert_competitions - ",  e, "\n")
+		print("\nGRESKA - insert_competitions - ",  e, "\n")
 
 
 def insert_standings(standings):
@@ -70,8 +106,15 @@ def insert_standings(standings):
 		data['points'] = str(standings['points'])
 		data['year'] = str(standings['year'])
 
-		queries.save("standings", data)
-		print("Success saving standings - competition - team " + standings['league_name'] + standings['team'])
+		id = queries.fetch("standings", ["id"], "id_competition='{}' and id_team='{}' and year='{}' ".format(data['id_competition'],data['id_team'], data['year']))
+
+		if id:
+			queries.update("standings", data, "id = '{}'".format(id[0][0]))
+			print("Success update standings - competition - team " + standings['league_name'] + standings['team'], "\n")
+		else:
+			queries.save("standings", data)
+			print("Success saving standings - competition - team " + standings['league_name'] + standings['team'], "\n")
+
 	except Exception as e:
 		print("GRESKA - insert_standings - ",  e, "\n")
 
@@ -83,10 +126,11 @@ def insert_summary(data):
 			summary["{}".format(i.lower().replace(" ", "_"))] = json.dumps(data[i]).replace('"','\\"')
 
 		response = queries.save("summary", summary)
-		print("Success saving summary " + str(summary))
+		print("Success saving summary " + str(summary), "\n")
 		return response
 	except Exception as e:
-		print("GRESKA - summary - ",  e, "\n")
+		print("\nGRESKA - summary - ",  e, "\n")
+
 
 def insert_statistics(data):
 	try:
@@ -98,12 +142,13 @@ def insert_statistics(data):
 				statistics["team2_{}".format(i.lower().replace(" ", "_"))] = data[i]["team2"].replace("%", "")
 
 		response = queries.save("statistics", statistics)
-		print("Success saving statistics " + str(statistics))
+		print("Success saving statistics " + str(statistics), "\n")
 		return response
 	except Exception as e:
-		print("GRESKA - statistics - ",  e, "\n")
+		print("\nGRESKA - statistics - ",  e, "\n")
 
-def insert_events(info, statistics, summary):
+
+def insert_events(info):
 	try:
 		id_competition = queries.fetch("competitions", ["id"], "name='%s'" % info['tournament_part'])[0][0]
 		id_team1 = queries.fetch("teams", ["id"], "name='%s'" % info['home'])[0][0]
@@ -122,20 +167,61 @@ def insert_events(info, statistics, summary):
 
 		data['time_started'] = datetime.datetime.strptime(info['time'], "%d.%m.%Y")
 
-		# TODO: URADITI STATISTIKU I SUMMARY
-		data['id_summary'] = statistics
-		data['id_statistics'] = summary
-
 		event = queries.fetch("events", ["id"], "time_started='{}' and id_team1={} and id_team2={}".format(data['time_started'],data['id_team1'],data['id_team2']))
 
 		if not event:
-			queries.save("events", data)
-			print("Success saving event - time - teams " + str(data['time_started']) + " - " + str(data['id_team1']) + " - " + str(data['id_team2']))
-		else:
-			print("Event already exists - time - teams " + str(data['time_started']) + " - " + str(data['id_team1']) + " - " + str(data['id_team2']))
-	except Exception as e:
-		print("GRESKA - insert_events - ",  e, "\n")
+			data['id_statistics'] = insert_statistics(info['statistics'])[0]
+			data['id_summary'] = insert_summary(info['summary'])[0]
 
+			queries.save("events", data)
+			print("Success saving event - time - teams " + str(data['time_started']) + " - " + str(data['id_team1']) + " - " + str(data['id_team2']), "\n")
+		else:
+			pass
+			# print("Event already exists - time - teams " + str(data['time_started']) + " - " + str(data['id_team1']) + " - " + str(data['id_team2']), "\n")
+	except Exception as e:
+		print("\nGRESKA - insert_events - ",  e, "\n")
+
+
+def update_statistics(team1, team2, time, statistics_data):
+	try:
+
+		id_team1 = queries.fetch("teams", ["id"], "name='%s'" % team1)[0][0]
+		id_team2 = queries.fetch("teams", ["id"], "name='%s'" % team2)[0][0]
+		event = queries.fetch("events", ["id"], "time_started='{}' and id_team1={} and id_team2={}".format(time, id_team1, id_team2))
+
+		statistics={}
+
+		for i in statistics_data:
+			if i.lower().replace(" ","_") in ["yellow_cards", "red_cards", "ball_possession", "shots_on_goal", "shots_off_goal", "corner_kicks", "free_kicks", "fouls", "offsides"]:
+				statistics["team1_{}".format(i.lower().replace(" ", "_"))] = statistics_data[i]["team1"].replace("%", "")
+				statistics["team2_{}".format(i.lower().replace(" ", "_"))] = statistics_data[i]["team2"].replace("%", "")
+
+		response = queries.update("statistics", statistics, "id = {}".format(event[0][0]))
+		print("Success updating statistics " + str(statistics), "\n")
+		return response
+	except Exception as e:
+		print("\nGRESKA - statistics update - ",  e, "\n")
+
+
+def update_summary(team1, team2, time, summary_data):
+	try:
+
+		id_team1 = queries.fetch("teams", ["id"], "name='%s'" % team1)[0][0]
+		id_team2 = queries.fetch("teams", ["id"], "name='%s'" % team2)[0][0]
+		event_id = queries.fetch("events", ["id"], "time_started='{}' and id_team1={} and id_team2={}".format(time, id_team1, id_team2))
+
+		summary={}
+
+		for i in summary_data:
+			if i.lower().replace(" ","_") in ["yellow_cards", "red_cards", "ball_possession", "shots_on_goal", "shots_off_goal", "corner_kicks", "free_kicks", "fouls", "offsides"]:
+				summary["team1_{}".format(i.lower().replace(" ", "_"))] = summary_data[i]["team1"].replace("%", "")
+				summary["team2_{}".format(i.lower().replace(" ", "_"))] = summary_data[i]["team2"].replace("%", "")
+
+		response = queries.update("summary", summary, "id = {}".format(event_id[0][0]))
+		print("Success updating summary " + str(summary), "\n")
+		return response
+	except Exception as e:
+		print("\nGRESKA - summary update - ",  e, "\n")
 
 
 
@@ -184,11 +270,9 @@ for team in teams:
 		insert_teams(country, team1)
 		insert_teams(country, team2)
 
-		statistics_id = insert_statistics(statistics)
-		summary_id = insert_summary(summary)
+		insert_events(data)
 
-		insert_events(data, statistics_id[0], summary_id[0])
-
+		# sys.exit()
 		# ***************************
 
 		# print("*" * 25)
@@ -214,8 +298,10 @@ for team in teams:
 
 standings = rdb.keys("standings-*")
 for standing in standings:
+
 	standing = rdb.hgetall(standing)
 	for competition in standing:
+
 		competition = json.loads(standing[competition].replace("'", '"'))
 
 		insert_competitions(competition['country'], competition['league_name'])

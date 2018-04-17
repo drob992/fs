@@ -174,7 +174,7 @@ class Collector(QWebPage):
 					self._frame.load(QNetworkRequest(QUrl("https://www.flashscore.com/match/{}/#match-summary".format(match['flashscore_id']))))
 
 					self.summary_click = True
-					QTimer().singleShot(3000, self.parse_statistics)
+					QTimer().singleShot(3500, self.parse_statistics)
 
 					self.team = team
 					self.i = i
@@ -190,12 +190,12 @@ class Collector(QWebPage):
 				summary_btn = self._frame.findFirstElement("#a-match-statistics")
 				util.simulate_click(summary_btn)
 				self.summary_click = False
-				QTimer().singleShot(2000, self.parse_statistics)
+				QTimer().singleShot(3500, self.parse_statistics)
 				# print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 			except Exception as e:
 				self.summary_click = False
 				QTimer().singleShot(3000, self.parse_statistics)
-				print("\npuklo na klik statistics\n", e)
+				print("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!puklo na klik statistics!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n", e)
 		else:
 			try:
 				try:
@@ -277,16 +277,23 @@ class Collector(QWebPage):
 						summary[self.period]["score"] = self.score
 
 				try:
+					try:
+						summary_btn = self._frame.findFirstElement("#a-match-statistics")
+						util.simulate_click(summary_btn)
+					except Exception as e:
+						print(e)
+
 					main = self._frame.findFirstElement("#tab-statistics-0-statistic")
 					rows = main.findAll('tr')
 
+					print("33333333333333333333333333333333333333333333333333")
 					for i in range(len(rows)):
-
+						print("44444444444444444444444444444444444444444444444444444")
 						stats_name = rows.at(i).findAll('td').at(1).toPlainText().strip()
 						stats_team1 = rows.at(i).findAll('td').at(0).toPlainText().strip()
 						stats_team2 = rows.at(i).findAll('td').at(2).toPlainText().strip()
-
 						statistics[stats_name] = {'team1': stats_team1, 'team2': stats_team2}
+						print(statistics[stats_name])
 				except Exception as e:
 					print("\nPotraga za statistikom nije uspela\n", e)
 

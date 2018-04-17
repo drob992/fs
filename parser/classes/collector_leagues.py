@@ -335,16 +335,16 @@ class Collector(QWebPage):
 						# event = time, " - ", home, " - ", away, " - ", score, " - ", win_lose, " - ", country_part, tournament_part, " - ", id
 						event = {"id":x, "sport":"Football", "time":time, "home":home, "away":away, "score":score, "win_lose":win_lose, "country":country, "country_part":country_part, "tournament_part":tournament_part, "flashscore_id":id}
 
-						if country.title().replace(":","").replace(" ", "") == country_part.title().replace(":","").replace(" ", "") and team_name == "Bayern Munich":
+						if country.title().replace(":","").replace(" ", "") == country_part.title().replace(":","").replace(" ", ""):# and team_name == "Bayern Munich":
 							self.redis.hset(team_name, x, json.dumps(event))
 
 						print(country_part, tournament_part)
 						print(time, " - ", home, " - ", away, " - ", score, " - ", win_lose, " - ", id)
 
 		print(team_name)
-		if team_name == "Bayern Munich":
-			print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
-			self.redis.sadd("team_names", team_name)
+		# if team_name == "Bayern Munich":
+		print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
+		self.redis.sadd("team_names", team_name)
 
 		self.resourse_check()
 		QTimer().singleShot(3000, self.open_leagues)
@@ -394,21 +394,21 @@ class Collector(QWebPage):
 					time.sleep(2)
 					cmd += " (5)"
 					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					time.sleep(2)
-					cmd += " (6)"
-					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					time.sleep(2)
-					cmd += " (7)"
-					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					time.sleep(2)
-					cmd += " (8)"
-					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					time.sleep(2)
-					cmd += " (9)"
-					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					time.sleep(2)
-					cmd += " (10)"
-					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					# time.sleep(2)
+					# cmd += " (6)"
+					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					# time.sleep(2)
+					# cmd += " (7)"
+					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					# time.sleep(2)
+					# cmd += " (8)"
+					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					# time.sleep(2)
+					# cmd += " (9)"
+					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					# time.sleep(2)
+					# cmd += " (10)"
+					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 				else:
 					print("RADI")
 			break
