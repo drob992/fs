@@ -9,8 +9,8 @@ from parser.config import *
 
 def insert_countries(country):
 	try:
-
 		country_id = queries.fetch("countries", ["id"], "name='%s'" % country)
+
 		if not country_id:
 			queries.save("countries", {"name": country})
 			print("Success saving country " + country, "\n")
@@ -135,7 +135,6 @@ def insert_summary(data):
 def insert_statistics(data):
 	try:
 		statistics={}
-
 		for i in data:
 			if i.lower().replace(" ","_") in ["yellow_cards", "red_cards", "ball_possession", "shots_on_goal", "shots_off_goal", "corner_kicks", "free_kicks", "fouls", "offsides"]:
 				statistics["team1_{}".format(i.lower().replace(" ", "_"))] = data[i]["team1"].replace("%", "")
@@ -184,7 +183,6 @@ def insert_events(info):
 
 def update_statistics(team1, team2, time, statistics_data):
 	try:
-
 		id_team1 = queries.fetch("teams", ["id"], "name='%s'" % team1)[0][0]
 		id_team2 = queries.fetch("teams", ["id"], "name='%s'" % team2)[0][0]
 		event = queries.fetch("events", ["id"], "time_started='{}' and id_team1={} and id_team2={}".format(time, id_team1, id_team2))
@@ -205,7 +203,6 @@ def update_statistics(team1, team2, time, statistics_data):
 
 def update_summary(team1, team2, time, summary_data):
 	try:
-
 		id_team1 = queries.fetch("teams", ["id"], "name='%s'" % team1)[0][0]
 		id_team2 = queries.fetch("teams", ["id"], "name='%s'" % team2)[0][0]
 		event_id = queries.fetch("events", ["id"], "time_started='{}' and id_team1={} and id_team2={}".format(time, id_team1, id_team2))
@@ -224,90 +221,89 @@ def update_summary(team1, team2, time, summary_data):
 		print("\nGRESKA - summary update - ",  e, "\n")
 
 
+if __name__ == '__main__':
 
-rdb = redis.StrictRedis(host='localhost', port=redis_master_port, decode_responses=True, password=redis_pass)
+	rdb = redis.StrictRedis(host='localhost', port=redis_master_port, decode_responses=True, password=redis_pass)
+
+	teams = rdb.keys("new-*")
+
+	for team in teams:
+		team_data = rdb.hgetall(team)
+
+		current_team = team.replace('new-', '')
+		# print(current_team)
+
+		for i in team_data:
+			data = json.loads(team_data[i])
+
+			# print(json.dumps(data, indent=4))
+
+			competition_type = data['sport']
+
+			country = data['country']
+
+			team1 = data['home']
+			team2 = data['away']
+
+			time = data['time']
+
+			score = data['score'].replace(" ", "")
+
+			competition = data['tournament_part']
+
+			competition_organiser = data['country_part'].replace(":", "").title()
+
+			summary = data['summary']
+			statistics = data['statistics']
+
+			# Insert ------ !!!!!!!
+			insert_countries(country)
+
+			insert_types(competition_type)
+			insert_competition_organisers(competition_type, competition_organiser)
+			insert_competitions(competition_organiser, competition)
+
+			insert_teams(country, team1)
+			insert_teams(country, team2)
+
+			insert_events(data)
+
+			# sys.exit()
+			# ***************************
+
+			# print("*" * 25)
+			# print("Country: " + country)
+			# print("*" * 25)
+			# print("Team1: " + team1)
+			# print("Team2: " + team2)
+			# print("*" * 25)
+			# print("Score: " + score)
+			# print("*" * 25)
+			# print("Time: " + time)
+			# print("*" * 25)
+			# print("Competition: " + competition)
+			# print("*" * 25)
+			# print("CompetitionOrganiser: " + competition_organiser)
+			# print("*" * 25)
+			# print("Summary: " + summary)
+			# print(summary)
+			# print("*" * 25)
+			# print("Statistics: " + statistics)
+			# print("*" * 25)
 
 
-teams = rdb.keys("new-*")
+	standings = rdb.keys("standings-*")
+	for standing in standings:
 
-for team in teams:
-	team_data = rdb.hgetall(team)
+		standing = rdb.hgetall(standing)
+		for competition in standing:
 
-	current_team = team.replace('new-', '')
-	print(current_team)
+			competition = json.loads(standing[competition].replace("'", '"'))
 
-	for i in team_data:
-		data = json.loads(team_data[i])
+			insert_competitions(competition['country'], competition['league_name'])
 
-		# print(json.dumps(data, indent=4))
+			insert_teams(competition["country"], competition['team'])
 
-		competition_type = data['sport']
+			insert_standings(competition)
 
-		country = data['country']
-
-		team1 = data['home']
-		team2 = data['away']
-
-		time = data['time']
-
-		score = data['score'].replace(" ", "")
-
-		competition = data['tournament_part']
-
-		competition_organiser = data['country_part'].replace(":","").title()
-
-		summary = data['summary']
-		statistics = data['statistics']
-
-
-		# Insert ------ !!!!!!!
-		insert_countries(country)
-
-		insert_types(competition_type)
-		insert_competition_organisers(competition_type, competition_organiser)
-		insert_competitions(competition_organiser, competition)
-
-		insert_teams(country, team1)
-		insert_teams(country, team2)
-
-		insert_events(data)
-
-		# sys.exit()
-		# ***************************
-
-		# print("*" * 25)
-		# print("Country: " + country)
-		# print("*" * 25)
-		# print("Team1: " + team1)
-		# print("Team2: " + team2)
-		# print("*" * 25)
-		# print("Score: " + score)
-		# print("*" * 25)
-		# print("Time: " + time)
-		# print("*" * 25)
-		# print("Competition: " + competition)
-		# print("*" * 25)
-		# print("CompetitionOrganiser: " + competition_organiser)
-		# print("*" * 25)
-		# print("Summary: " + summary)
-		# print(summary)
-		# print("*" * 25)
-		# print("Statistics: " + statistics)
-		# print("*" * 25)
-
-
-standings = rdb.keys("standings-*")
-for standing in standings:
-
-	standing = rdb.hgetall(standing)
-	for competition in standing:
-
-		competition = json.loads(standing[competition].replace("'", '"'))
-
-		insert_competitions(competition['country'], competition['league_name'])
-
-		insert_teams(competition["country"], competition['team'])
-
-		insert_standings(competition)
-
-sys.exit()
+	sys.exit()

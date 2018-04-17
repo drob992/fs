@@ -156,7 +156,7 @@ class Collector(QWebPage):
 						league = league_list.at(x).findAll("a").at(0)
 
 						# Uzimamo samo Bundesliga
-						if league.toPlainText().strip() in ["Bundesliga"]:
+						if league.toPlainText().strip() in ["Bundesliga", "2. Bundesliga", "3. Liga"]:
 							print(league.toPlainText().strip())
 							self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
 							self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
@@ -180,7 +180,7 @@ class Collector(QWebPage):
 						league = league_list.at(x).findAll("a").at(0)
 
 						# Uzimamo samo Bundesliga
-						if league.toPlainText().strip() in ["Bundesliga"]:
+						if league.toPlainText().strip() in ["Bundesliga", "2. Bundesliga", "3. Liga"]:
 							print(league.toPlainText().strip())
 							self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
 							self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
