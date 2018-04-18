@@ -185,18 +185,22 @@ def update_statistics(team1, team2, time, statistics_data):
 	try:
 		id_team1 = queries.fetch("teams", ["id"], "name='%s'" % team1)[0][0]
 		id_team2 = queries.fetch("teams", ["id"], "name='%s'" % team2)[0][0]
-		event = queries.fetch("events", ["id"], "time_started='{}' and id_team1={} and id_team2={}".format(time, id_team1, id_team2))
+
+		if ":" and " " in time:
+			time = time.split(" ")[0]+str(datetime.datetime.now().year)
+		time = datetime.datetime.strptime(time, "%d.%m.%Y")
+
+		event = queries.fetch("events", ["id"], "time_started='{}' and id_team1='{}' and id_team2='{}'".format(time, id_team1, id_team2))[0][0]
 
 		statistics={}
-
 		for i in statistics_data:
 			if i.lower().replace(" ","_") in ["yellow_cards", "red_cards", "ball_possession", "shots_on_goal", "shots_off_goal", "corner_kicks", "free_kicks", "fouls", "offsides"]:
 				statistics["team1_{}".format(i.lower().replace(" ", "_"))] = statistics_data[i]["team1"].replace("%", "")
 				statistics["team2_{}".format(i.lower().replace(" ", "_"))] = statistics_data[i]["team2"].replace("%", "")
 
-		response = queries.update("statistics", statistics, "id = {}".format(event[0][0]))
+		queries.update("statistics", statistics, "id = '{}'".format(event))
 		print("Success updating statistics " + str(statistics), "\n")
-		return response
+
 	except Exception as e:
 		print("\nGRESKA - statistics update - ",  e, "\n")
 
@@ -205,18 +209,20 @@ def update_summary(team1, team2, time, summary_data):
 	try:
 		id_team1 = queries.fetch("teams", ["id"], "name='%s'" % team1)[0][0]
 		id_team2 = queries.fetch("teams", ["id"], "name='%s'" % team2)[0][0]
-		event_id = queries.fetch("events", ["id"], "time_started='{}' and id_team1={} and id_team2={}".format(time, id_team1, id_team2))
+
+		if ":" and " " in time:
+			time = time.split(" ")[0]+str(datetime.datetime.now().year)
+		time = datetime.datetime.strptime(time, "%d.%m.%Y")
+
+		event_id = queries.fetch("events", ["id"], "time_started='{}' and id_team1='{}' and id_team2='{}'".format(time, id_team1, id_team2))[0][0]
 
 		summary={}
-
 		for i in summary_data:
-			if i.lower().replace(" ","_") in ["yellow_cards", "red_cards", "ball_possession", "shots_on_goal", "shots_off_goal", "corner_kicks", "free_kicks", "fouls", "offsides"]:
-				summary["team1_{}".format(i.lower().replace(" ", "_"))] = summary_data[i]["team1"].replace("%", "")
-				summary["team2_{}".format(i.lower().replace(" ", "_"))] = summary_data[i]["team2"].replace("%", "")
+			summary["{}".format(i.lower().replace(" ", "_"))] = json.dumps(summary_data[i]).replace('"','\\"')
 
-		response = queries.update("summary", summary, "id = {}".format(event_id[0][0]))
+		queries.update("summary", summary, "id = '{}'".format(event_id))
 		print("Success updating summary " + str(summary), "\n")
-		return response
+
 	except Exception as e:
 		print("\nGRESKA - summary update - ",  e, "\n")
 
@@ -237,36 +243,40 @@ if __name__ == '__main__':
 			data = json.loads(team_data[i])
 
 			# print(json.dumps(data, indent=4))
+			#
+			# competition_type = data['sport']
+			#
+			# country = data['country']
+			#
+			# team1 = data['home']
+			# team2 = data['away']
+			#
+			# time = data['time']
+			#
+			# score = data['score'].replace(" ", "")
+			#
+			# competition = data['tournament_part']
+			#
+			# competition_organiser = data['country_part'].replace(":", "").title()
+			#
+			# summary = data['summary']
+			# statistics = data['statistics']
+			#
+			## Insert ------ !!!!!!!
+			# insert_countries(country)
+			#
+			# insert_types(competition_type)
+			# insert_competition_organisers(competition_type, competition_organiser)
+			# insert_competitions(competition_organiser, competition)
+			#
+			# insert_teams(country, team1)
+			# insert_teams(country, team2)
+			#
+			# insert_events(data)
 
-			competition_type = data['sport']
+			# update_statistics(data['home'], data['away'], data['time'], data['statistics'])
 
-			country = data['country']
-
-			team1 = data['home']
-			team2 = data['away']
-
-			time = data['time']
-
-			score = data['score'].replace(" ", "")
-
-			competition = data['tournament_part']
-
-			competition_organiser = data['country_part'].replace(":", "").title()
-
-			summary = data['summary']
-			statistics = data['statistics']
-
-			# Insert ------ !!!!!!!
-			insert_countries(country)
-
-			insert_types(competition_type)
-			insert_competition_organisers(competition_type, competition_organiser)
-			insert_competitions(competition_organiser, competition)
-
-			insert_teams(country, team1)
-			insert_teams(country, team2)
-
-			insert_events(data)
+			update_summary(data['home'], data['away'], data['time'], data['summary'])
 
 			# sys.exit()
 			# ***************************
@@ -290,20 +300,20 @@ if __name__ == '__main__':
 			# print("*" * 25)
 			# print("Statistics: " + statistics)
 			# print("*" * 25)
+			sys.exit()
+	#
+	# standings = rdb.keys("standings-*")
+	# for standing in standings:
+	#
+	# 	standing = rdb.hgetall(standing)
+	# 	for competition in standing:
+	#
+	# 		competition = json.loads(standing[competition].replace("'", '"'))
+	#
+	# 		insert_competitions(competition['country'], competition['league_name'])
+	#
+	# 		insert_teams(competition["country"], competition['team'])
+	#
+	# 		insert_standings(competition)
 
-
-	standings = rdb.keys("standings-*")
-	for standing in standings:
-
-		standing = rdb.hgetall(standing)
-		for competition in standing:
-
-			competition = json.loads(standing[competition].replace("'", '"'))
-
-			insert_competitions(competition['country'], competition['league_name'])
-
-			insert_teams(competition["country"], competition['team'])
-
-			insert_standings(competition)
-
-	sys.exit()
+	# sys.exit()
