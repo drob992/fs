@@ -144,11 +144,12 @@ class Collector(QWebPage):
 		random.shuffle(team_names)
 		for team in team_names:
 
-			matches = self.redis.hgetall(team)
+			matches = self.redis.hgetall("team-{}".format(team))
 
 			if len(matches) == 0 or team in ["", " ", None]:
 				try:
 					print(len(matches), "stefan 222222")
+					print("\n\n\n\nOOOOOOOOOOOOOOOOOOOOOO\n\n\n\n")
 					self.redis.srem("team_names", team)
 					continue
 				except:

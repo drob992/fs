@@ -79,6 +79,7 @@ class Collector(QWebPage):
 		self.loadFinished.connect(self.read_page)
 
 		self.checker = 0
+		self.checker_team = 0
 
 		if self.debug:
 			self.log.info("Flashscore parser started, with headers: ")
@@ -92,18 +93,36 @@ class Collector(QWebPage):
 
 		if self.first_load:
 
-			self.redis.delete("processed")
+			if self.redis.get("restart_standings"):
+				self.redis.set("restart_standings", False)
+				link = self.redis.get("s-link")
+				self._frame.load(QNetworkRequest(QUrl(link)))
+				print("restart_standings TRUE")
+				QTimer().singleShot(2000, self.get_teams_standings)
+				self.first_load = False
 
-			self.statistics = QTimer()
-			self.statistics.timeout.connect(self.match_statistics)
-			self.statistics.start(10000)
+			elif self.redis.get("restart_team"):
+				self.redis.set("restart_team", False)
+				link = self.redis.get("t-link")
+				self._frame.load(QNetworkRequest(QUrl(link + "results")))
+				print("restart_team TRUE")
+				QTimer().singleShot(2000, self.parse_team)
+				self.first_load = False
 
-			QTimer().singleShot(2000, self.open_country_menu)
-			self.first_load = False
+			else:
+				self.redis.delete("processed")
+
+				self.statistics = QTimer()
+				self.statistics.timeout.connect(self.match_statistics)
+				self.statistics.start(10000)
+
+				QTimer().singleShot(2000, self.open_country_menu)
+				self.first_load = False
 
 	def open_country_menu(self):
 
 		print("1111111111111111111111")
+
 		main = self._frame.findFirstElement("#main")
 
 		# Mora se raditi iz dva dela, zato sto je kod njih lista u dva diva iz dva dela
@@ -115,16 +134,12 @@ class Collector(QWebPage):
 				country = country_list.at(i).findAll("a").at(0)
 				self.redis.sadd('countries', country.toPlainText().lower().replace(" ", "-"))
 				util.simulate_click(country)
-				# print(country.toPlainText().strip())
-				# print("----------------------------")
 
 		for i in range(0, len(country_list1)):
 			if country_list1.at(i).hasAttribute("id"):
 				country1 = country_list1.at(i).findAll("a").at(0)
 				util.simulate_click(country1)
 				self.redis.sadd('countries', country1.toPlainText().lower().replace(" ", "-"))
-				# print(country1.toPlainText().strip())
-				# print("----------------------------")
 
 		QTimer().singleShot(2000, self.get_league_links)
 
@@ -156,13 +171,13 @@ class Collector(QWebPage):
 							league = league_list.at(x).findAll("a").at(0)
 
 							# Uzimamo samo Bundesliga
-							# if league.toPlainText().strip() in ["Southern Premier League"]:
-							if "cup" not in league.toPlainText().lower().strip():
-								print(league.toPlainText().strip())
-								self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
-								self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
-								# print(league.toPlainText().strip())
-								# print("----------------------------")
+							if league.toPlainText().strip() in ["Premier League"]:
+								if "cup" not in league.toPlainText().lower().strip():
+									print(league.toPlainText().strip())
+									self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
+									self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
+									# print(league.toPlainText().strip())
+									# print("----------------------------")
 
 			for i in range(0, len(country_list1)):
 				if country_list1.at(i).hasAttribute("id"):
@@ -181,13 +196,13 @@ class Collector(QWebPage):
 							league = league_list.at(x).findAll("a").at(0)
 
 							# Uzimamo samo Bundesliga
-							# if league.toPlainText().strip() in ["Southern Premier League"]:
-							if "cup" not in league.toPlainText().lower().strip():
-								print(league.toPlainText().strip())
-								self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
-								self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
-								# print(league.toPlainText().strip())
-								# print("----------------------------")
+							if league.toPlainText().strip() in ["Premier League"]:
+								if "cup" not in league.toPlainText().lower().strip():
+									print(league.toPlainText().strip())
+									self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
+									self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
+									# print(league.toPlainText().strip())
+									# print("----------------------------")
 
 			# Posto smo gore izbacili "Other Competitions" moramo rucno dodati world_cup
 			# self.redis.sadd('leagues_links', "https://www.flashscore.com/football/world/world-cup/")
@@ -215,16 +230,12 @@ class Collector(QWebPage):
 			# OPEN TEAM LINK
 			for link in team_links:
 				self.redis.srem("team_links", link)
+				self.redis.set("t-link", link)
 				print(link+"results")
 				if link != "https://www.flashscore.com":
 					self._frame.load(QNetworkRequest(QUrl(link+"results")))
-					print("qwqweqweqweqweqweqweqweqweqweqweqw")
 
-					get1 = int(self.redis.get("counter1")) + 1
-					self.redis.set('counter1', get1)
-					print("counter1 ", get1)
-
-					QTimer().singleShot(3500, self.parse_team)
+					QTimer().singleShot(3000, self.parse_team)
 				else:
 					QTimer().singleShot(3500, self.open_leagues)
 				break
@@ -232,15 +243,13 @@ class Collector(QWebPage):
 		else:
 			# Prvo otvaramo lige, kada dodjemo do kraja, setujemo parse_teams na True da bi ulazili u if iznad
 			if len(league_links) in [0, 1]:
-				print("usaooooooooooo")
 				self.redis.set("parse_teams", True)
 
 			for link in league_links:
 
-
 				self.redis.srem("leagues_links", link)
+				self.redis.set("s-link", True)
 				print(link.lower())
-				print(">>>>>>>>>>>>>>>>>>>>>>>>>>")
 				# Izbacujemo kupove za sada, potrebni drugacije parsiranje :D
 				if "cup" in link.lower() and link.lower() != "https://www.flashscore.com/football/world/world-cup/" or "offs" in link.lower():
 					QTimer().singleShot(3000, self.open_leagues)
@@ -248,7 +257,7 @@ class Collector(QWebPage):
 
 				self._frame.load(QNetworkRequest(QUrl(link)))
 
-				QTimer().singleShot(4000, self.get_teams_standings)
+				QTimer().singleShot(3000, self.get_teams_standings)
 
 				break
 
@@ -272,13 +281,6 @@ class Collector(QWebPage):
 			print("EXCEPT BRE 444444444")
 
 		print(country, league_name)
-		print("Groups", len(groups))
-		if len(groups) == 0:
-			if self.checker == 4:
-				self.reload_collector()
-			else:
-				self.checker += 1
-				QTimer().singleShot(1000, self.get_teams_standings)
 
 		for i in range(len(groups)):
 			teams = groups.at(i).findAll("tr")
@@ -295,12 +297,22 @@ class Collector(QWebPage):
 				link_for_team = team.attribute("onclick").replace("javascript:getUrlByWinType('", "").replace("');", "")
 				self.redis.sadd("team_links", "https://www.flashscore.com{}".format(link_for_team))
 				self.redis.hset("standings-%s" % league_name, team.toPlainText().strip(), {"country":country, "league_name":league_name, "team":team.toPlainText().strip(), "played":played, "wins":wins, "draws":draws, "losses":losses, "goals":goals, "points":points, "year": year})
-				print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-				print(team.toPlainText(), played, wins, draws, losses, goals, points)
+				# print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+				# print(team.toPlainText(), played, wins, draws, losses, goals, points)
 
-		print("44444444444!!!!!!!!!!!!!!!!!!")
-		QTimer().singleShot(1500, self.open_leagues)
-
+		print("Groups", len(groups))
+		if len(groups) == 0:
+			if self.checker == 5:
+				print("RESTARTTTTTTTT !!!!!!!!!!!!!!!!!!!!")
+				self.redis.set("restart_standings", True)
+				self.reload_collector()
+			else:
+				self.checker += 1
+				print("+++++++++++++++ 11111111111111111111111111")
+				QTimer().singleShot(1000, self.get_teams_standings)
+		else:
+			print("44444444444!!!!!!!!!!!!!!!!!!")
+			QTimer().singleShot(1500, self.open_leagues)
 
 	def parse_team(self):
 		print("555555555555555555")
@@ -324,13 +336,10 @@ class Collector(QWebPage):
 		country_part = None
 		tournament_part = None
 
-		get3 = int(self.redis.get("counter3")) + 1
-		get4 = int(self.redis.get("counter4")) + 1
-		get5 = int(self.redis.get("counter5")) + 1
-
 		try:
-			print("\n\n$$$#@#$@#$@#$@#$#@@@@@@teams_countries", "{}@{}".format(team_name, country))
 			self.redis.sadd("teams_countries", "{}@{}".format(team_name, country))
+			print("\n\n\n\n" + team_name)
+			print("teams_countries", "{}@{}".format(team_name, country))
 		except:
 			print("EXCEPT BRE open_team3333")
 
@@ -338,8 +347,6 @@ class Collector(QWebPage):
 			for x in range(len(tr)):
 
 				row = tr.at(x)
-
-
 
 				if row.hasClass("league"):
 					country_part = row.findAll(".country_part").at(0).toPlainText().strip()
@@ -357,57 +364,49 @@ class Collector(QWebPage):
 							# event = time, " - ", home, " - ", away, " - ", score, " - ", win_lose, " - ", country_part, tournament_part, " - ", id
 							event = {"id":x, "sport":"Football", "time":time, "home":home, "away":away, "score":score, "win_lose":win_lose, "country":country, "country_part":country_part, "tournament_part":tournament_part, "flashscore_id":id}
 
-							self.redis.set('counter5', get5)
-							print("counter5 ", get5)
-
 							###  OVDE JE PROBLEM
 							### PRIMER: U ENGLESKOJ PREMIJER LIGI, IGRAJU TIMOVI IZ WELSA
 							### ZATO NE MOZEMO KORISTITI "IF" DOLE ISPOD, ZA TE TIMOVE NECE PROCI UPIS
 
-
 							# if country.title().replace(":","").replace(" ", "") == country_part.title().replace(":","").replace(" ", ""):# and team_name == "Bayern Munich":
 							tournament_list = ["world", "europe", "asia", "africa", "southamerica", "north&centralamerica", "australia&oceania"]
 							if all(tournament not in country_part.lower().replace(":","").replace(" ", "") for tournament in tournament_list):
-								self.redis.hset(team_name, x, json.dumps(event))
-								self.redis.set('counter3', get3)
-								print("counter3 ", get3)
+								self.redis.hset("team-{}".format(team_name), x, json.dumps(event))
 
-							print(country_part, tournament_part)
-							print(time, " - ", home, " - ", away, " - ", score, " - ", win_lose, " - ", id)
+							# print(country_part, tournament_part)
+							# print(time, " - ", home, " - ", away, " - ", score, " - ", win_lose, " - ", id)
 
-			print(team_name)
-			# if team_name == "Bayern Munich":
-			print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
+			print("\n\n\n\n" + team_name)
+			print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n\n\n\n")
 			self.redis.sadd("team_names", team_name)
 
-			get2 = int(self.redis.get("counter2")) + 1
-			self.redis.set('counter2', get2)
-			print("counter2 ", get2)
-
-			self.resourse_check()
-			QTimer().singleShot(3000, self.open_leagues)
+			QTimer().singleShot(1500, self.resourse_check)
+			QTimer().singleShot(2500, self.open_leagues)
 			print("555555555555555!!!!!!!!!!!!!!!!!!")
 		else:
-			self.redis.set('counter4', get4)
-			print("counter4 ", get4)
-			QTimer().singleShot(1000, self.parse_team)
+			if self.checker_team == 5:
+				print("RESTARTTTTTTTT !!!!!!!!!!!!!!!!!!! checker_team  " + str(self.checker_team))
+				self.redis.set("restart_team", True)
+				self.reload_collector()
+			else:
+				self.checker_team += 1
+				print("++++++++++++++++++ 11111111111111111111111111  checker_team " + str(self.checker_team))
+				QTimer().singleShot(1000, self.parse_team)
 
+		print("\n\n")
 
 	def match_statistics(self):
 
 		team_names = self.redis.smembers("team_names")
-		print("POKUSAO SAM")
 		for team in team_names:
 
 			# self.statistics.stop()
-			matches = self.redis.hgetall(team)
-			print("STVARNO")
+			matches = self.redis.hgetall("team-{}".format(team))
 			if matches:
 
 				cmd = 'python3 {}parser/classes/collector_statistics.py'.format(project_root_path)  #
 				allready_running = None
 				pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
-				print("MAJKE MI")
 				for pid in pids:
 					try:
 						tst = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()
@@ -423,34 +422,34 @@ class Collector(QWebPage):
 				print("JEL RADI")
 				if not allready_running:
 					print("PUSTAM")
-					# cmd += " (1)"
+					cmd += " (1)"
+					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					time.sleep(2)
+					cmd = cmd.replace("(1)", "(2)")
+					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					time.sleep(2)
+					cmd = cmd.replace("(2)", "(3)")
+					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					time.sleep(2)
+					cmd = cmd.replace("(3)", "(4)")
+					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					time.sleep(2)
+					cmd = cmd.replace("(4)", "(5)")
+					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					# time.sleep(2)
+					# cmd = cmd.replace("(5)", "(6)")
 					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					# time.sleep(2)
-					# cmd += " (2)"
+					# cmd = cmd.replace("(6)", "(7)")
 					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					# time.sleep(2)
-					# cmd += " (3)"
+					# cmd = cmd.replace("(7)", "(8)")
 					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					# time.sleep(2)
-					# cmd += " (4)"
+					# cmd = cmd.replace("(8)", "(9)")
 					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					# time.sleep(2)
-					# cmd += " (5)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd += " (6)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd += " (7)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd += " (8)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd += " (9)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd += " (10)"
+					# cmd = cmd.replace("(9)", "(10)")
 					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 				else:
 					print("RADI")

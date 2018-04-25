@@ -37,7 +37,7 @@ def insert_teams(country, team):
 
 
 	except Exception as e:
-		print("\nGRESKA - insert_teams - ",  e, "\n")
+		print("\nGRESKA - insert_teams - ",  e, country, team, "\n")
 
 
 def insert_types(competition_type):
@@ -148,12 +148,11 @@ def insert_statistics(data):
 
 
 def insert_events(info):
+	data = {}
 	try:
 		id_competition = queries.fetch("competitions", ["id"], "name='%s'" % info['tournament_part'])[0][0]
 		id_team1 = queries.fetch("teams", ["id"], "name='%s'" % info['home'])[0][0]
 		id_team2 = queries.fetch("teams", ["id"], "name='%s'" % info['away'])[0][0]
-
-		data = {}
 
 		data['id_competition'] = int(id_competition)
 		data['id_team1'] = int(id_team1)
@@ -166,7 +165,7 @@ def insert_events(info):
 
 		data['time_started'] = datetime.datetime.strptime(info['time'], "%d.%m.%Y")
 
-		event = queries.fetch("events", ["id"], "time_started='{}' and id_team1={} and id_team2={}".format(data['time_started'],data['id_team1'],data['id_team2']))
+		event = queries.fetch("events", ["id"], "time_started='{}' and id_team1={} and id_team2={} and id_competition={}".format(data['time_started'],data['id_team1'],data['id_team2'], data['id_competition']))
 
 		if not event:
 			data['id_statistics'] = insert_statistics(info['statistics'])[0]
@@ -176,9 +175,9 @@ def insert_events(info):
 			print("Success saving event - time - teams " + str(data['time_started']) + " - " + str(data['id_team1']) + " - " + str(data['id_team2']), "\n")
 		else:
 			pass
-			# print("Event already exists - time - teams " + str(data['time_started']) + " - " + str(data['id_team1']) + " - " + str(data['id_team2']), "\n")
+			print("@@@@@@@Event already exists - time - teams " + str(data['time_started']) + " - " + str(data['id_team1']) + " - " + str(data['id_team2']), "\n")
 	except Exception as e:
-		print("\nGRESKA - insert_events - ",  e, "\n")
+		print("\nGRESKA - insert_events - ",  e, info['home'],info['away'],data, "\n")
 
 
 def update_statistics(team1, team2, time, statistics_data):
@@ -188,7 +187,7 @@ def update_statistics(team1, team2, time, statistics_data):
 
 		if ":" and " " in time:
 			time = time.split(" ")[0]+str(datetime.datetime.now().year)
-		time = datetime.datetime.strptime(time, "%d.%m.%Y")
+		time = datetime.datetime.strptime(time, "%Y-%m-%d")
 
 		event = queries.fetch("events", ["id"], "time_started='{}' and id_team1='{}' and id_team2='{}'".format(time, id_team1, id_team2))[0][0]
 
@@ -212,7 +211,7 @@ def update_summary(team1, team2, time, summary_data):
 
 		if ":" and " " in time:
 			time = time.split(" ")[0]+str(datetime.datetime.now().year)
-		time = datetime.datetime.strptime(time, "%d.%m.%Y")
+		time = datetime.datetime.strptime(time, "%Y-%m-%d")
 
 		event_id = queries.fetch("events", ["id"], "time_started='{}' and id_team1='{}' and id_team2='{}'".format(time, id_team1, id_team2))[0][0]
 
@@ -227,9 +226,49 @@ def update_summary(team1, team2, time, summary_data):
 		print("\nGRESKA - summary update - ",  e, "\n")
 
 
+def update_event(old_data, new_data):
+	try:
+		id_competition = queries.fetch("competitions", ["id"], "name='%s'" % old_data['tournament_part'])[0][0]
+		id_team1 = queries.fetch("teams", ["id"], "name='%s'" % old_data["home"])[0][0]
+		id_team2 = queries.fetch("teams", ["id"], "name='%s'" % old_data["away"])[0][0]
+
+		if ":" and " " in old_data['time']:
+			old_data['time'] = old_data['time'].split(" ")[0]+str(datetime.datetime.now().year)
+
+		time = datetime.datetime.strptime(old_data['time'], "%d.%m.%Y")
+
+		event = queries.fetch("events", ["id"], "time_started='{}' and id_team1={} and id_team2={} and id_competition='{}'".format(old_data['time'], id_team1, id_team2, id_competition))
+
+		time = str(time).split(" ")[0]
+		if data['statistics']:
+			update_statistics(old_data['home'], old_data['away'], old_data['time'], old_data['statistics'])
+		if data['summary']:
+			update_summary(old_data['home'], old_data['away'], old_data['time'], old_data['summary'])
+
+		if event:
+			queries.update("events", new_data, "id = '{}'".format(event[0][0]))
+			print("Success updating event - time - teams " + str(time) + " - " + str(old_data['home']) + " - " + str(old_data['away']), "\n")
+		else:
+			pass
+			print("Cant find Event to update")
+
+	except Exception as e:
+		print("\nGRESKA - event update - ",  e, "\n")
+
+
 if __name__ == '__main__':
 
 	rdb = redis.StrictRedis(host='localhost', port=redis_master_port, decode_responses=True, password=redis_pass)
+
+	tc = rdb.smembers("teams_countries")
+
+	for i in tc:
+		tc_team, tc_country = i.split("@")
+		tc_team = tc_team.replace("'", "\\'")
+
+		insert_countries(tc_country)
+
+		insert_teams(tc_country, tc_team)
 
 	teams = rdb.keys("new-*")
 
@@ -241,42 +280,46 @@ if __name__ == '__main__':
 
 		for i in team_data:
 			data = json.loads(team_data[i])
-
+			data['home'] = data['home'].replace("'", "\\'")
+			data['away'] = data['away'].replace("'", "\\'")
 			# print(json.dumps(data, indent=4))
-			#
-			# competition_type = data['sport']
-			#
-			# country = data['country']
-			#
-			# team1 = data['home']
-			# team2 = data['away']
-			#
-			# time = data['time']
-			#
-			# score = data['score'].replace(" ", "")
-			#
-			# competition = data['tournament_part']
-			#
-			# competition_organiser = data['country_part'].replace(":", "").title()
-			#
-			# summary = data['summary']
-			# statistics = data['statistics']
-			#
-			## Insert ------ !!!!!!!
-			# insert_countries(country)
-			#
-			# insert_types(competition_type)
-			# insert_competition_organisers(competition_type, competition_organiser)
-			# insert_competitions(competition_organiser, competition)
-			#
-			# insert_teams(country, team1)
-			# insert_teams(country, team2)
-			#
-			# insert_events(data)
+
+			competition_type = data['sport']
+
+			country = data['country']
+
+			team1 = data['home']
+			team2 = data['away']
+
+			time = data['time']
+
+			score = data['score'].replace(" ", "")
+
+			competition = data['tournament_part'].replace("'", "\\'")
+
+			competition_organiser = data['country_part'].replace(":", "").title()
+
+			summary = data['summary']
+			statistics = data['statistics']
+
+			# Insert ------ !!!!!!!
+			insert_countries(country)
+
+			insert_types(competition_type)
+			insert_competition_organisers(competition_type, competition_organiser)
+			insert_competitions(competition_organiser, competition)
+
+			# ISPARSIRAJ PRVO SVE TIMOVE KOJI POSTOJE, NJIH UBACI, PA ONDA PARSIRAJ EVENTE I STATISTIKE
+			insert_teams(country, team1)
+			insert_teams(country, team2)
+
+			insert_events(data)
 
 			# update_statistics(data['home'], data['away'], data['time'], data['statistics'])
 
-			update_summary(data['home'], data['away'], data['time'], data['summary'])
+			# update_summary(data['home'], data['away'], data['time'], data['summary'])
+
+			# update_event(data['home'], data['away'], data['time'], data)
 
 			# sys.exit()
 			# ***************************
@@ -300,20 +343,24 @@ if __name__ == '__main__':
 			# print("*" * 25)
 			# print("Statistics: " + statistics)
 			# print("*" * 25)
-			sys.exit()
-	#
-	# standings = rdb.keys("standings-*")
-	# for standing in standings:
-	#
-	# 	standing = rdb.hgetall(standing)
-	# 	for competition in standing:
-	#
-	# 		competition = json.loads(standing[competition].replace("'", '"'))
-	#
-	# 		insert_competitions(competition['country'], competition['league_name'])
-	#
-	# 		insert_teams(competition["country"], competition['team'])
-	#
-	# 		insert_standings(competition)
+			# sys.exit()
+
+	standings = rdb.keys("standings-*")
+	for standing in standings:
+
+		standing = rdb.hgetall(standing)
+		for competition in standing:
+			try:
+				competition = competition.replace("'", "\\'")
+				competition = json.loads(standing[competition].replace("'", '"'))
+
+				insert_competitions(competition['country'], competition['league_name'])
+
+				# ISPARSIRAJ PRVO SVE TIMOVE KOJI POSTOJE, NJIH UBACI, PA ONDA PARSIRAJ EVENTE I STATISTIKE
+				insert_teams(competition["country"], competition['team'].replace("'", "\\'"))
+
+				insert_standings(competition)
+			except Exception as e:
+				print("Puklo standing", e, competition)
 
 	# sys.exit()
