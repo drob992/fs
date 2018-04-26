@@ -93,8 +93,8 @@ class Collector(QWebPage):
 
 	@pyqtSlot()
 	def read_page(self):
-
 		if self.first_load:
+			print("1111111111111111111111111111111111111111111111")
 
 			self.hash = QTimer()
 			self.hash.timeout.connect(self.check_hash)
@@ -104,6 +104,7 @@ class Collector(QWebPage):
 			self.first_load = False
 
 	def check_hash(self):
+		print("222222222222222222222222222222222222222222222222")
 
 		self._check_hash_counter += 1
 		if self._check_hash_counter == 6:
@@ -136,7 +137,8 @@ class Collector(QWebPage):
 		if len(team_names) == 0:
 			print(len(team_names), "stefan 11111")
 			time.sleep(5)
-			cmd = 'python3 {}parser/stop.py'.format(project_root_path)
+			# cmd = 'python3 {}parser/stop.py'.format(project_root_path)
+			cmd = 'python3.4 {}parser/stop.py'.format(project_root_path)
 			subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 			QTimer().singleShot(30000, self.match_statistics)
 
@@ -306,7 +308,7 @@ class Collector(QWebPage):
 				self.match_statistics()
 
 			try:
-				event = json.loads(self.redis.hget(self.team, self.i))
+				event = json.loads(self.redis.hget("team-{}".format(self.team), self.i))
 
 				self.redis.hset("old-"+self.team, self.i, json.dumps(event))
 
@@ -320,7 +322,7 @@ class Collector(QWebPage):
 				# self.log.info('Collector emmit: {}'.format(data))
 				# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-				self.redis.hdel(self.team, self.i)
+				self.redis.hdel("team-{}".format(self.team), self.i)
 
 				self.resourse_check()
 				self.summary_click = True
@@ -346,7 +348,8 @@ class Collector(QWebPage):
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_statistics" in proces_name and str(self.order_num) in proces_name and '/bin/sh' not in proces_name:
-					relaunch_cmd = "python3 collector_statistics.py {}".format(self.order_num)
+					# relaunch_cmd = "python3 collector_statistics.py {}".format(self.order_num)
+					relaunch_cmd = "python3.4 collector_statistics.py {}".format(self.order_num)
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()
 			except IOError:
@@ -357,8 +360,7 @@ if __name__ == "__main__":
 
 	order_num = sys.argv[-1]
 
-	collector_log = util.parserLog('/var/log/sbp/flashscore/collector_statistics.log', 'flashscore-collector')
-
+	collector_log = util.parserLog('/var/log/sbp/flashscore/collector_statistics.log', 'flashscore-collector-statistics')
 	app = QApplication(sys.argv)
 	web = QWebView()
 	webpage = Collector(parent=web, page_link=common.live_link, debug=True, logger=collector_log, order_num=order_num)

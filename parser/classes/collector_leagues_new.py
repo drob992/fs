@@ -337,9 +337,19 @@ class Collector(QWebPage):
 		tournament_part = None
 
 		try:
-			self.redis.sadd("teams_countries", "{}@{}".format(team_name, country))
-			print("\n\n\n\n" + team_name)
-			print("teams_countries", "{}@{}".format(team_name, country))
+			if team_name is None or country is None:
+				if self.checker_team == 5:
+					print("RESTARTTTTTTTT !!!!!!!!!!!!!!!!!!! checker_team  " + str(self.checker_team))
+					self.redis.set("restart_team", True)
+					self.reload_collector()
+				else:
+					self.checker_team += 1
+					print("++++++++++++++++++ 11111111111111111111111111  checker_team " + str(self.checker_team))
+					QTimer().singleShot(1000, self.parse_team)
+			else:
+				self.redis.sadd("teams_countries", "{}@{}".format(team_name, country))
+				print("\n\n\n\n" + team_name)
+				print("teams_countries", "{}@{}".format(team_name, country))
 		except:
 			print("EXCEPT BRE open_team3333")
 
@@ -404,7 +414,8 @@ class Collector(QWebPage):
 			matches = self.redis.hgetall("team-{}".format(team))
 			if matches:
 
-				cmd = 'python3 {}parser/classes/collector_statistics.py'.format(project_root_path)  #
+				# cmd = 'python3 {}parser/classes/collector_statistics.py'.format(project_root_path)  #
+				cmd = 'python3.4 {}parser/classes/collector_statistics.py'.format(project_root_path)  #
 				allready_running = None
 				pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
 				for pid in pids:
@@ -471,7 +482,8 @@ class Collector(QWebPage):
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_leagues" in proces_name and '/bin/sh' not in proces_name:
-					relaunch_cmd = "python3 {}".format(proces_name[10:-2])
+					# relaunch_cmd = "python3 {}".format(proces_name[10:-2])
+					relaunch_cmd = "python3.4 {}".format(proces_name[12:-2])
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()
 			except IOError:
@@ -481,7 +493,6 @@ class Collector(QWebPage):
 if __name__ == "__main__":
 
 	collector_log = util.parserLog('/var/log/sbp/flashscore/collector_leagues.log', 'flashscore-collector')
-	# todo: if gui in sys.argv True
 	app = QApplication(sys.argv)
 	web = QWebView()
 	webpage = Collector(parent=web, page_link=common.live_link, debug=True, logger=collector_log)
