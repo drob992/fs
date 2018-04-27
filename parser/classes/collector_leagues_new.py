@@ -80,7 +80,6 @@ class Collector(QWebPage):
 
 		self.checker = 0
 		self.checker_team = 0
-		self.last_team_name = None
 		if self.debug:
 			self.log.info("Flashscore parser started, with headers: ")
 			for hd in self._req.rawHeaderList():
@@ -336,12 +335,14 @@ class Collector(QWebPage):
 		tr = main.findAll("#fs-results").at(0).findAll("tr")
 		team_name = main.findAll('.team-name').at(0).toPlainText().strip()
 
-		if self.last_team_name == team_name:
+		opened_team = self.redis.get("t-link").split("/")[4]
+		menu = main.findAll(".ifmenu").at(0).findAll("a").at(0).attribute("href")
+
+		print("|\n{}\n{}\n|".format(opened_team, menu))
+		if opened_team not in menu:
 			print("\n\nONAJ BAG KAD ZABODE TIM\n\n")
 			self.redis.set("restart_team", True)
 			self.reload_collector()
-		else:
-			self.last_team_name = team_name
 
 		country_part = None
 		tournament_part = None
