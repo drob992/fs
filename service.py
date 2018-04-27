@@ -262,13 +262,13 @@ if __name__ == '__main__':
 
 	tc = rdb.smembers("teams_countries")
 
-	for i in tc:
-		tc_team, tc_country = i.split("@")
-		tc_team = tc_team.replace("'", "\\'")
-
-		insert_countries(tc_country)
-
-		insert_teams(tc_country, tc_team)
+	# for i in tc:
+	# 	tc_team, tc_country = i.split("@")
+	# 	tc_team = tc_team.replace("'", "\\'")
+	#
+	# 	insert_countries(tc_country)
+	#
+	# 	insert_teams(tc_country, tc_team)
 
 	teams = rdb.keys("new-*")
 
@@ -303,15 +303,15 @@ if __name__ == '__main__':
 			statistics = data['statistics']
 
 			# Insert ------ !!!!!!!
-			insert_countries(country)
+			# insert_countries(country)
 
 			insert_types(competition_type)
 			insert_competition_organisers(competition_type, competition_organiser)
 			insert_competitions(competition_organiser, competition)
 
 			# ISPARSIRAJ PRVO SVE TIMOVE KOJI POSTOJE, NJIH UBACI, PA ONDA PARSIRAJ EVENTE I STATISTIKE
-			insert_teams(country, team1)
-			insert_teams(country, team2)
+			# insert_teams(country, team1)
+			# insert_teams(country, team2)
 
 			insert_events(data)
 
@@ -357,7 +357,7 @@ if __name__ == '__main__':
 				insert_competitions(competition['country'], competition['league_name'])
 
 				# ISPARSIRAJ PRVO SVE TIMOVE KOJI POSTOJE, NJIH UBACI, PA ONDA PARSIRAJ EVENTE I STATISTIKE
-				insert_teams(competition["country"], competition['team'].replace("'", "\\'"))
+				# insert_teams(competition["country"], competition['team'].replace("'", "\\'"))
 
 				insert_standings(competition)
 			except Exception as e:

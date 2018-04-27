@@ -80,7 +80,7 @@ class Collector(QWebPage):
 
 		self.checker = 0
 		self.checker_team = 0
-
+		self.last_team_name = None
 		if self.debug:
 			self.log.info("Flashscore parser started, with headers: ")
 			for hd in self._req.rawHeaderList():
@@ -171,7 +171,7 @@ class Collector(QWebPage):
 							league = league_list.at(x).findAll("a").at(0)
 
 							# Uzimamo samo Bundesliga
-							if league.toPlainText().strip() in ["Premier League"]:
+							if league.toPlainText().strip() not in ["Premier League"]:
 								if "cup" not in league.toPlainText().lower().strip():
 									print(league.toPlainText().strip())
 									self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
@@ -196,7 +196,7 @@ class Collector(QWebPage):
 							league = league_list.at(x).findAll("a").at(0)
 
 							# Uzimamo samo Bundesliga
-							if league.toPlainText().strip() in ["Premier League"]:
+							if league.toPlainText().strip() not in ["Premier League"]:
 								if "cup" not in league.toPlainText().lower().strip():
 									print(league.toPlainText().strip())
 									self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
@@ -248,7 +248,7 @@ class Collector(QWebPage):
 			for link in league_links:
 
 				self.redis.srem("leagues_links", link)
-				self.redis.set("s-link", True)
+				self.redis.set("s-link", link)
 				print(link.lower())
 				# Izbacujemo kupove za sada, potrebni drugacije parsiranje :D
 				if "cup" in link.lower() and link.lower() != "https://www.flashscore.com/football/world/world-cup/" or "offs" in link.lower():
@@ -268,12 +268,14 @@ class Collector(QWebPage):
 		print("44444444444444444444444444")
 
 		groups = None
+		groups_draw = None
 		league_name = None
 		country = None
 		year = None
 		try:
 			main = self._frame.findFirstElement("#main")
 			groups = main.findAll(".stats-table-container").at(0).findAll("tbody")
+			groups_draw = main.findAll(".playoff").at(0).toPlainText().strip()
 			country = main.findAll(".tournament").at(0).findAll("a").at(1).toPlainText().strip()
 			league_name = main.findAll('.tournament-name').at(0).toPlainText().strip()
 			year = main.findAll('.tournament').at(0).toPlainText().strip().split(" » ")[-1]
@@ -301,7 +303,11 @@ class Collector(QWebPage):
 				# print(team.toPlainText(), played, wins, draws, losses, goals, points)
 
 		print("Groups", len(groups))
-		if len(groups) == 0:
+		if len(groups_draw):
+			print("44444444444!!!!!!!!!!!!!!!!!!wwwwwwwwwwwwwwwwwwwwwwwwwww")
+			QTimer().singleShot(1500, self.open_leagues)
+
+		elif len(groups) == 0:
 			if self.checker == 5:
 				print("RESTARTTTTTTTT !!!!!!!!!!!!!!!!!!!!")
 				self.redis.set("restart_standings", True)
@@ -327,11 +333,15 @@ class Collector(QWebPage):
 		except:
 			print("Pukloeeeeee")
 
-		try:
-			tr = main.findAll("#fs-results").at(0).findAll("tr")
-			team_name = main.findAll('.team-name').at(0).toPlainText().strip()
-		except:
-			print("EXCEPT BRE open_team22")
+		tr = main.findAll("#fs-results").at(0).findAll("tr")
+		team_name = main.findAll('.team-name').at(0).toPlainText().strip()
+
+		if self.last_team_name == team_name:
+			print("\n\nONAJ BAG KAD ZABODE TIM\n\n")
+			self.redis.set("restart_team", True)
+			self.reload_collector()
+		else:
+			self.last_team_name = team_name
 
 		country_part = None
 		tournament_part = None
@@ -434,19 +444,19 @@ class Collector(QWebPage):
 				if not allready_running:
 					print("PUSTAM")
 					cmd += " (1)"
-					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					time.sleep(2)
-					cmd = cmd.replace("(1)", "(2)")
-					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					time.sleep(2)
-					cmd = cmd.replace("(2)", "(3)")
-					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					time.sleep(2)
-					cmd = cmd.replace("(3)", "(4)")
-					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					time.sleep(2)
-					cmd = cmd.replace("(4)", "(5)")
-					subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					# time.sleep(2)
+					# cmd = cmd.replace("(1)", "(2)")
+					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					# time.sleep(2)
+					# cmd = cmd.replace("(2)", "(3)")
+					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					# time.sleep(2)
+					# cmd = cmd.replace("(3)", "(4)")
+					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					# time.sleep(2)
+					# cmd = cmd.replace("(4)", "(5)")
+					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 					# time.sleep(2)
 					# cmd = cmd.replace("(5)", "(6)")
 					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
