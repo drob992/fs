@@ -163,7 +163,7 @@ class Collector(QWebPage):
 					country = country_list.at(i).findAll("a").at(0)
 					# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
 					# Uzimamo samo Germany
-					if country.toPlainText().strip() in ["England"]:
+					if country.toPlainText().strip() in common.europe:
 
 						league_list = country_list.at(i).findAll("ul").at(0).findAll("li")
 						for x in range(0, len(league_list)):
@@ -188,7 +188,7 @@ class Collector(QWebPage):
 					country = country_list1.at(i).findAll("a").at(0)
 					# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
 					# Uzimamo samo Germany
-					if country.toPlainText().strip() in ["England"]:
+					if country.toPlainText().strip() in common.europe:
 
 						league_list = country_list1.at(i).findAll("ul").at(0).findAll("li")
 						for x in range(0, len(league_list)):
