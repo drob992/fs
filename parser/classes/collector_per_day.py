@@ -28,12 +28,13 @@ class Collector(QWebPage):
 	# define signal
 	newChanges = pyqtSignal(dict)
 
-	def __init__(self, parent=None, page_link=None, debug=None, logger=None):
+	def __init__(self, parent=None, page_link=None, debug=None, logger=None, day=None):
 		super(Collector, self).__init__(parent)
 
 		self._parent = parent
 		self.debug = debug
 		self.log = logger
+		self.day = day
 
 		self.EVENT = None
 
@@ -91,111 +92,72 @@ class Collector(QWebPage):
 	def read_page(self):
 
 		if self.first_load:
+			print(self.day)
 
-			self.redis.delete("processed")
-
-			self.statistics = QTimer()
-			self.statistics.timeout.connect(self.match_statistics)
-			self.statistics.start(10000)
-
-			QTimer().singleShot(2000, self.open_country_menu)
+			QTimer().singleShot(2000, self.open_day)
 			self.first_load = False
 
-	def open_country_menu(self):
+	def open_day(self):
 
 		print("1111111111111111111111")
-		main = self._frame.findFirstElement("#main")
+		main = self._frame.findFirstElement("#fsbody")
 
-		# Mora se raditi iz dva dela, zato sto je kod njih lista u dva diva iz dva dela
-		country_list = main.findAll(".menu.country-list").at(2).findAll("li")
-		country_list1 = main.findAll(".menu.country-list").at(3).findAll("li")
+		# Otvaramo tab zavrsene utakmice
+		finished_games = main.findAll(".ifmenu").at(0).findAll("li2").at(0).findAll("a").at(0)
+		util.simulate_click(finished_games)
 
-		for i in range(1, len(country_list)):
-			if country_list.at(i).hasAttribute("id"):
-				country = country_list.at(i).findAll("a").at(0)
-				self.redis.sadd('countries', country.toPlainText().lower().replace(" ", "-"))
-				util.simulate_click(country)
-				# print(country.toPlainText().strip())
-				# print("----------------------------")
-
-		for i in range(0, len(country_list1)):
-			if country_list1.at(i).hasAttribute("id"):
-				country1 = country_list1.at(i).findAll("a").at(0)
-				util.simulate_click(country1)
-				self.redis.sadd('countries', country1.toPlainText().lower().replace(" ", "-"))
-				# print(country1.toPlainText().strip())
-				# print("----------------------------")
-
-		QTimer().singleShot(2000, self.get_league_links)
+		QTimer().singleShot(3000, self.parse)
 
 		print("11111111111!!!!!!!!!!!!!!!!!!!")
 
-	def get_league_links(self):
+	def parse(self):
 
 		print("22222222222222222")
-		main = self._frame.findFirstElement("#main")
+		main = self._frame.findFirstElement("#fsbody")
+		tr = main.findAll("#fs").at(0).findAll(".table-main").at(0).findAll("tr")
 
-		# Mora se raditi iz dva dela, zato sto je kod njih lista u dva diva iz dva dela
-		country_list = main.findAll(".menu.country-list").at(2).findAll("li")
-		country_list1 = main.findAll(".menu.country-list").at(3).findAll("li")
-		if not self.redis.get("parse_leagues"):
-			for i in range(1, len(country_list)):
-				if country_list.at(i).hasAttribute("id"):
+		country = None
+		country_part = None
+		tournament_part = None
 
-					# Ovde je izbacena lista "Other Competitions" (Africa, Asia, World, Europe ....)
-					if country_list.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
-						continue
+		if len(tr) != 0:
+			for x in range(len(tr)):
+				row = tr.at(x)
 
-					country = country_list.at(i).findAll("a").at(0)
-					# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
-					# Uzimamo samo Germany
-					if country.toPlainText().strip() in ["England"]:
+				if row.hasClass("league"):
+					country = row.findAll(".country").at(0).findAll(".flag").at(0).attribute("title")
+					country_part = row.findAll(".country_part").at(0).toPlainText().strip()
+					tournament_part = row.findAll(".tournament_part").at(0).toPlainText().strip()
+				else:
+					timer = row.findAll(".timer").at(0).toPlainText().strip()
+					id = row.attribute("id").replace("g_1_", "")
+					time = self._frame.findFirstElement("#tzactual").split(" ")[0]
+					home = row.findAll(".team-home").at(0).toPlainText().strip()
+					away = row.findAll(".team-away").at(0).toPlainText().strip()
+					score = row.findAll(".score").at(0).toPlainText().strip().replace("\n", " ").replace(u'\xa0', u' ')
+					win_lose = row.findAll(".win_lose_icon").at(0).attribute("title").strip()
 
-						league_list = country_list.at(i).findAll("ul").at(0).findAll("li")
-						for x in range(0, len(league_list)):
-							league = league_list.at(x).findAll("a").at(0)
+					if timer == "finished":
+						event = {"id": x, "sport": "Football", "time": time, "home": home, "away": away,
+						         "score": score, "win_lose": win_lose, "country": country,
+						         "country_part": country_part, "tournament_part": tournament_part,
+						         "flashscore_id": id}
 
-							# Uzimamo samo Bundesliga
-							# if league.toPlainText().strip() in ["Southern Premier League"]:
-							if "cup" not in league.toPlainText().lower().strip():
-								print(league.toPlainText().strip())
-								self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
-								self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
-								# print(league.toPlainText().strip())
-								# print("----------------------------")
+						tournament_list = ["world", "europe", "asia", "africa", "southamerica", "north&centralamerica", "australia&oceania"]
+						if all(tournament not in country_part.lower().replace(":", "").replace(" ", "") for tournament in tournament_list):
+							self.redis.hset("team-{}".format(home), x, json.dumps(event))
 
-			for i in range(0, len(country_list1)):
-				if country_list1.at(i).hasAttribute("id"):
+						# print(country_part, tournament_part)
+						# print(time, " - ", home, " - ", away, " - ", score, " - ", win_lose, " - ", id)
 
-					# Ovde je izbacena lista "Other Competitions" (Africa, Asia, World, Europe ....)
-					if country_list1.at(i).attribute("id") in ['lmenu_1' 'lmenu_2', 'lmenu_3', 'lmenu_4', 'lmenu_5', 'lmenu_6', 'lmenu_7', 'lmenu_8']:
-						continue
+			print("\n\n\n\n" + home)
+			print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n\n\n\n")
+			self.redis.sadd("team_names", home)
 
-					country = country_list1.at(i).findAll("a").at(0)
-					# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
-					# Uzimamo samo Germany
-					if country.toPlainText().strip() in ["England"]:
+			QTimer().singleShot(1500, self.resourse_check)
+			print("555555555555555!!!!!!!!!!!!!!!!!!")
 
-						league_list = country_list1.at(i).findAll("ul").at(0).findAll("li")
-						for x in range(0, len(league_list)):
-							league = league_list.at(x).findAll("a").at(0)
-
-							# Uzimamo samo Bundesliga
-							# if league.toPlainText().strip() in ["Southern Premier League"]:
-							if "cup" not in league.toPlainText().lower().strip():
-								print(league.toPlainText().strip())
-								self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
-								self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
-								# print(league.toPlainText().strip())
-								# print("----------------------------")
-
-			# Posto smo gore izbacili "Other Competitions" moramo rucno dodati world_cup
-			# self.redis.sadd('leagues_links', "https://www.flashscore.com/football/world/world-cup/")
-			# self.redis.sadd('leagues', "world-cup")
-
-		self.redis.set("parse_leagues", True)
-		print("222222222!!!!!!!!!!!!!!!!!!")
-		QTimer().singleShot(3000, self.open_leagues)
+		# QTimer().singleShot(3000, self.open_leagues)
 
 
 	def open_leagues(self):
@@ -339,8 +301,6 @@ class Collector(QWebPage):
 
 				row = tr.at(x)
 
-
-
 				if row.hasClass("league"):
 					country_part = row.findAll(".country_part").at(0).toPlainText().strip()
 					tournament_part = row.findAll(".tournament_part").at(0).toPlainText().strip()
@@ -481,11 +441,13 @@ class Collector(QWebPage):
 
 if __name__ == "__main__":
 
-	collector_log = util.parserLog('/var/log/sbp/flashscore/collector_leagues.log', 'flashscore-collector')
+	collector_log = util.parserLog('/var/log/sbp/flashscore/collector_per_day.log', 'flashscore-collector')
+
+	day = sys.argv[-1]
 	# todo: if gui in sys.argv True
 	app = QApplication(sys.argv)
 	web = QWebView()
-	webpage = Collector(parent=web, page_link=common.live_link, debug=True, logger=collector_log)
+	webpage = Collector(parent=web, page_link=common.live_link, debug=True, logger=collector_log, day=day)
 	web.setPage(webpage)
 	web.setGeometry(780, 0, 1200, 768)
 	web.show()
