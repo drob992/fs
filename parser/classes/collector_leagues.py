@@ -266,6 +266,7 @@ class Collector(QWebPage):
 	def get_teams_standings(self):
 		print("44444444444444444444444444")
 
+		bubble = None
 		groups = None
 		groups_draw = None
 		league_name = None
@@ -275,6 +276,7 @@ class Collector(QWebPage):
 			main = self._frame.findFirstElement("#main")
 			groups = main.findAll(".stats-table-container").at(0).findAll("tbody")
 			groups_draw = main.findAll(".playoff").at(0).toPlainText().strip()
+			bubble = main.findAll(".bubble").at(0).findAll("a").at(0)
 			country = main.findAll(".tournament").at(0).findAll("a").at(1).toPlainText().strip()
 			league_name = main.findAll('.tournament-name').at(0).toPlainText().strip()
 			year = main.findAll('.tournament').at(0).toPlainText().strip().split(" » ")[-1]
@@ -301,23 +303,31 @@ class Collector(QWebPage):
 				# print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 				# print(team.toPlainText(), played, wins, draws, losses, goals, points)
 
-		print("Groups", len(groups))
-		if len(groups_draw):
-			print("44444444444!!!!!!!!!!!!!!!!!!wwwwwwwwwwwwwwwwwwwwwwwwwww")
-			QTimer().singleShot(1500, self.open_leagues)
+		print("bubble", len(bubble))
+		if bubble:
+			util.simulate_click(bubble)
+			QTimer().singleShot(4000, self.get_teams_standings)
 
-		elif len(groups) == 0:
-			if self.checker == 5:
-				print("RESTARTTTTTTTT !!!!!!!!!!!!!!!!!!!!")
-				self.redis.set("restart_standings", True)
-				self.reload_collector()
-			else:
-				self.checker += 1
-				print("+++++++++++++++ 11111111111111111111111111")
-				QTimer().singleShot(1000, self.get_teams_standings)
 		else:
-			print("44444444444!!!!!!!!!!!!!!!!!!")
-			QTimer().singleShot(1500, self.open_leagues)
+			print("Groups", len(groups))
+			if len(groups_draw):
+				print("44444444444!!!!!!!!!!!!!!!!!!wwwwwwwwwwwwwwwwwwwwwwwwwww")
+				self.redis.set("restart_standings", False)
+				QTimer().singleShot(1500, self.open_leagues)
+
+			elif len(groups) == 0:
+				if self.checker == 5:
+					print("RESTARTTTTTTTT !!!!!!!!!!!!!!!!!!!!")
+					self.redis.set("restart_standings", True)
+					self.reload_collector()
+				else:
+					self.checker += 1
+					print("+++++++++++++++ 11111111111111111111111111")
+					QTimer().singleShot(1000, self.get_teams_standings)
+			else:
+				print("44444444444!!!!!!!!!!!!!!!!!!")
+				self.redis.set("restart_standings", False)
+				QTimer().singleShot(1500, self.open_leagues)
 
 	def parse_team(self):
 		print("555555555555555555")

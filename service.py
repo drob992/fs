@@ -257,110 +257,111 @@ def update_event(old_data, new_data):
 
 
 if __name__ == '__main__':
-
 	rdb = redis.StrictRedis(host='localhost', port=redis_master_port, decode_responses=True, password=redis_pass)
 
 	tc = rdb.smembers("teams_countries")
+	print(len(tc))
+	br = 1
+	for i in tc:
+		print(br)
+		tc_team, tc_country = i.split("@")
+		tc_team = tc_team.replace("'", "\\'")
 
-	# for i in tc:
-	# 	tc_team, tc_country = i.split("@")
-	# 	tc_team = tc_team.replace("'", "\\'")
-	#
-	# 	insert_countries(tc_country)
-	#
-	# 	insert_teams(tc_country, tc_team)
+		insert_countries(tc_country)
 
+		insert_teams(tc_country, tc_team)
+		br += 1
 	teams = rdb.keys("new-*")
 
-	for team in teams:
-		team_data = rdb.hgetall(team)
-
-		current_team = team.replace('new-', '')
-		# print(current_team)
-
-		for i in team_data:
-			data = json.loads(team_data[i])
-			data['home'] = data['home'].replace("'", "\\'")
-			data['away'] = data['away'].replace("'", "\\'")
-			# print(json.dumps(data, indent=4))
-
-			competition_type = data['sport']
-
-			country = data['country']
-
-			team1 = data['home']
-			team2 = data['away']
-
-			time = data['time']
-
-			score = data['score'].replace(" ", "")
-
-			competition = data['tournament_part'].replace("'", "\\'")
-
-			competition_organiser = data['country_part'].replace(":", "").title()
-
-			summary = data['summary']
-			statistics = data['statistics']
-
-			# Insert ------ !!!!!!!
-			# insert_countries(country)
-
-			insert_types(competition_type)
-			insert_competition_organisers(competition_type, competition_organiser)
-			insert_competitions(competition_organiser, competition)
-
-			# ISPARSIRAJ PRVO SVE TIMOVE KOJI POSTOJE, NJIH UBACI, PA ONDA PARSIRAJ EVENTE I STATISTIKE
-			# insert_teams(country, team1)
-			# insert_teams(country, team2)
-
-			insert_events(data)
-
-			# update_statistics(data['home'], data['away'], data['time'], data['statistics'])
-
-			# update_summary(data['home'], data['away'], data['time'], data['summary'])
-
-			# update_event(data['home'], data['away'], data['time'], data)
-
-			# sys.exit()
-			# ***************************
-
-			# print("*" * 25)
-			# print("Country: " + country)
-			# print("*" * 25)
-			# print("Team1: " + team1)
-			# print("Team2: " + team2)
-			# print("*" * 25)
-			# print("Score: " + score)
-			# print("*" * 25)
-			# print("Time: " + time)
-			# print("*" * 25)
-			# print("Competition: " + competition)
-			# print("*" * 25)
-			# print("CompetitionOrganiser: " + competition_organiser)
-			# print("*" * 25)
-			# print("Summary: " + summary)
-			# print(summary)
-			# print("*" * 25)
-			# print("Statistics: " + statistics)
-			# print("*" * 25)
-			# sys.exit()
-
-	standings = rdb.keys("standings-*")
-	for standing in standings:
-
-		standing = rdb.hgetall(standing)
-		for competition in standing:
-			try:
-				competition = competition.replace("'", "\\'")
-				competition = json.loads(standing[competition].replace("'", '"'))
-
-				insert_competitions(competition['country'], competition['league_name'])
-
-				# ISPARSIRAJ PRVO SVE TIMOVE KOJI POSTOJE, NJIH UBACI, PA ONDA PARSIRAJ EVENTE I STATISTIKE
-				# insert_teams(competition["country"], competition['team'].replace("'", "\\'"))
-
-				insert_standings(competition)
-			except Exception as e:
-				print("Puklo standing", e, competition)
+	# for team in teams:
+	# 	team_data = rdb.hgetall(team)
+	#
+	# 	current_team = team.replace('new-', '')
+	# 	# print(current_team)
+	#
+	# 	for i in team_data:
+	# 		data = json.loads(team_data[i])
+	# 		data['home'] = data['home'].replace("'", "\\'")
+	# 		data['away'] = data['away'].replace("'", "\\'")
+	# 		# print(json.dumps(data, indent=4))
+	#
+	# 		competition_type = data['sport']
+	#
+	# 		country = data['country']
+	#
+	# 		team1 = data['home']
+	# 		team2 = data['away']
+	#
+	# 		time = data['time']
+	#
+	# 		score = data['score'].replace(" ", "")
+	#
+	# 		competition = data['tournament_part'].replace("'", "\\'")
+	#
+	# 		competition_organiser = data['country_part'].replace(":", "").title()
+	#
+	# 		summary = data['summary']
+	# 		statistics = data['statistics']
+	#
+	# 		# Insert ------ !!!!!!!
+	# 		# insert_countries(country)
+	#
+	# 		insert_types(competition_type)
+	# 		insert_competition_organisers(competition_type, competition_organiser)
+	# 		insert_competitions(competition_organiser, competition)
+	#
+	# 		# ISPARSIRAJ PRVO SVE TIMOVE KOJI POSTOJE, NJIH UBACI, PA ONDA PARSIRAJ EVENTE I STATISTIKE
+	# 		# insert_teams(country, team1)
+	# 		# insert_teams(country, team2)
+	#
+	# 		insert_events(data)
+	#
+	# 		# update_statistics(data['home'], data['away'], data['time'], data['statistics'])
+	#
+	# 		# update_summary(data['home'], data['away'], data['time'], data['summary'])
+	#
+	# 		# update_event(data['home'], data['away'], data['time'], data)
+	#
+	# 		# sys.exit()
+	# 		# ***************************
+	#
+	# 		# print("*" * 25)
+	# 		# print("Country: " + country)
+	# 		# print("*" * 25)
+	# 		# print("Team1: " + team1)
+	# 		# print("Team2: " + team2)
+	# 		# print("*" * 25)
+	# 		# print("Score: " + score)
+	# 		# print("*" * 25)
+	# 		# print("Time: " + time)
+	# 		# print("*" * 25)
+	# 		# print("Competition: " + competition)
+	# 		# print("*" * 25)
+	# 		# print("CompetitionOrganiser: " + competition_organiser)
+	# 		# print("*" * 25)
+	# 		# print("Summary: " + summary)
+	# 		# print(summary)
+	# 		# print("*" * 25)
+	# 		# print("Statistics: " + statistics)
+	# 		# print("*" * 25)
+	# 		# sys.exit()
+	#
+	# standings = rdb.keys("standings-*")
+	# for standing in standings:
+	#
+	# 	standing = rdb.hgetall(standing)
+	# 	for competition in standing:
+	# 		try:
+	# 			competition = competition.replace("'", "\\'")
+	# 			competition = json.loads(standing[competition].replace("'", '"'))
+	#
+	# 			insert_competitions(competition['country'], competition['league_name'])
+	#
+	# 			# ISPARSIRAJ PRVO SVE TIMOVE KOJI POSTOJE, NJIH UBACI, PA ONDA PARSIRAJ EVENTE I STATISTIKE
+	# 			# insert_teams(competition["country"], competition['team'].replace("'", "\\'"))
+	#
+	# 			insert_standings(competition)
+	# 		except Exception as e:
+	# 			print("Puklo standing", e, competition)
 
 	# sys.exit()

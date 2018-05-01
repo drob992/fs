@@ -59,8 +59,10 @@ delay_after_ft = 15
 single_event_ttl = 1800
 kickof_time_offset = 1
 
-europe = ["France", "England", "England", "Germany", "Spain", "Turkey", "Italy", "Portugal"]
-europe_2 = ["Switzerland", "Albania", "Romania", "Wales", "Slovakia", "Russia", "Poland", "Northern Ireland", "Ukraine", "Croatia", "Czech Republic", "Belgium", "Ireland", "Sweden", "Hungary", "Iceland", "Austria"]
+# europe = ["France", "England", "England", "Germany", "Spain", "Turkey", "Italy", "Portugal", "Belgium", "Hungary", "Russia", "Iceland"]
+europe = ["Northern Ireland", "Ireland"]
+
+europe_2 = ["Czech Republic", "Albania", "Romania", "Wales", "Slovakia", "Ukraine", "Croatia", "Sweden", "Austria", "Poland"]
 
 
 master_servers = ["master", "stefan-desktop", "www-desktop"]
