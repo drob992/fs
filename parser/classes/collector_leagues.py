@@ -162,7 +162,7 @@ class Collector(QWebPage):
 		# Mora se raditi iz dva dela, zato sto je kod njih lista u dva diva iz dva dela
 		country_list = main.findAll(".menu.country-list").at(2).findAll("li")
 		country_list1 = main.findAll(".menu.country-list").at(3).findAll("li")
-		if self.redis.get("parse_leagues") and self.redis.get("parse_leagues") == False:
+		if self.redis.get("parse_leagues") != "True":
 			for i in range(1, len(country_list)):
 				if country_list.at(i).hasAttribute("id"):
 
@@ -489,6 +489,7 @@ class Collector(QWebPage):
 	def resourse_check(self):
 
 		print('!!!!!!!!!!!!!!!!!!!!!!iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+		self.settings().setAttribute(QWebSettings.clearMemoryCaches(), True)
 		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 700000:
 			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)

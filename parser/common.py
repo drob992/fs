@@ -59,7 +59,7 @@ delay_after_ft = 15
 single_event_ttl = 1800
 kickof_time_offset = 1
 
-statistics_num = 5
+statistics_num = 0
 
 # europe = ["France", "England", "England", "Germany", "Spain", "Turkey", "Italy", "Portugal", "Belgium", "Hungary", "Russia", "Iceland"]
 europe = ["Northern Ireland", "Ireland"]
