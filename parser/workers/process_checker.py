@@ -42,7 +42,7 @@ def check_league_activity():
         except IOError:
             continue
 
-    if active is False and (not rdb.get("parse_teams") or len(rdb.smembers('team_links')) != 0 or not rdb.get("parse_leagues")):
+    if (active is False and (not rdb.get("parse_teams") or len(rdb.smembers('team_links')) != 0 or not rdb.get("parse_leagues"))) or rdb.get("leagues_active") == "False":
         # relaunch_cmd = "python3 {}parser/classes/collector_leagues.py".format(project_root_path)
         relaunch_cmd = "python3.4 {}parser/classes/collector_leagues.py".format(project_root_path)
         subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)

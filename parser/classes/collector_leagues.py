@@ -92,7 +92,7 @@ class Collector(QWebPage):
 
 		if self.first_load:
 
-			if self.redis.get("restart_standings"):
+			if self.redis.get("restart_standings") and self.redis.get("restart_standings") == "True":
 				self.redis.set("restart_standings", False)
 				link = self.redis.get("s-link")
 				self._frame.load(QNetworkRequest(QUrl(link)))
@@ -100,7 +100,7 @@ class Collector(QWebPage):
 				QTimer().singleShot(2000, self.get_teams_standings)
 				self.first_load = False
 
-			elif self.redis.get("restart_team"):
+			elif self.redis.get("restart_team") and self.redis.get("restart_team") == "True":
 				self.redis.set("restart_team", False)
 				link = self.redis.get("t-link")
 				self._frame.load(QNetworkRequest(QUrl(link + "results")))
@@ -116,7 +116,17 @@ class Collector(QWebPage):
 				self.statistics.start(10000)
 
 				QTimer().singleShot(2000, self.open_country_menu)
+
+
+				self.active = QTimer()
+				self.active.timeout.connect(self.leagues_active)
+				self.active.start(5000)
+
 				self.first_load = False
+
+	def leagues_active(self):
+		self.redis.set("leagues_active", True)
+		self.redis.expire("leagues_active", 30)
 
 	def open_country_menu(self):
 
@@ -152,7 +162,7 @@ class Collector(QWebPage):
 		# Mora se raditi iz dva dela, zato sto je kod njih lista u dva diva iz dva dela
 		country_list = main.findAll(".menu.country-list").at(2).findAll("li")
 		country_list1 = main.findAll(".menu.country-list").at(3).findAll("li")
-		if not self.redis.get("parse_leagues"):
+		if self.redis.get("parse_leagues") and self.redis.get("parse_leagues") == False:
 			for i in range(1, len(country_list)):
 				if country_list.at(i).hasAttribute("id"):
 
@@ -218,7 +228,7 @@ class Collector(QWebPage):
 
 		league_links = self.redis.smembers('leagues_links')
 
-		if self.redis.get("parse_teams"):
+		if self.redis.get("parse_teams") and self.redis.get("parse_teams") == "True":
 			print("333111111")
 			team_links = self.redis.smembers('team_links')
 
@@ -340,6 +350,9 @@ class Collector(QWebPage):
 
 	def parse_team(self):
 		print("555555555555555555")
+
+		self.redis.set("restart_standings", False)
+		self.redis.set("restart_team", False)
 
 		tr = None
 		team_name = None
