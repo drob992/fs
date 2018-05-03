@@ -152,7 +152,7 @@ class Collector(QWebPage):
 		# Mora se raditi iz dva dela, zato sto je kod njih lista u dva diva iz dva dela
 		country_list = main.findAll(".menu.country-list").at(2).findAll("li")
 		country_list1 = main.findAll(".menu.country-list").at(3).findAll("li")
-		if self.redis.get("parse_leagues") and self.redis.get("parse_leagues") == False:
+		if self.redis.get("parse_leagues") != "True":
 			for i in range(1, len(country_list)):
 				if country_list.at(i).hasAttribute("id"):
 
@@ -186,7 +186,6 @@ class Collector(QWebPage):
 					# if country.toPlainText().strip() not in ["Africa", "Asia", "Australia & Oceania", "Europe", "North & Central America", "South America", "World"]:
 					# Uzimamo samo Germany
 					if country.toPlainText().strip() in common.europe:
-
 						league_list = country_list1.at(i).findAll("ul").at(0).findAll("li")
 						for x in range(0, len(league_list)):
 							league = league_list.at(x).findAll("a").at(0)
@@ -301,6 +300,7 @@ class Collector(QWebPage):
 					QTimer().singleShot(1000, self.get_teams_standings)
 			else:
 				self.redis.set("restart_standings", False)
+				QTimer().singleShot(500, self.resourse_check)
 				QTimer().singleShot(1500, self.open_leagues)
 
 	def parse_team(self):
@@ -417,11 +417,11 @@ class Collector(QWebPage):
 	def resourse_check(self):
 
 		print('!!!!!!!!!!!!!!!!!!!!!!iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+		self.settings().setAttribute(QWebSettings.clearMemoryCaches(), True)
 		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 700000:
 			self.log.error('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-			print("Presao limit")
 			self.reload_collector()
 
 	def reload_collector(self):

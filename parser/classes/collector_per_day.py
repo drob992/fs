@@ -203,6 +203,7 @@ class Collector(QWebPage):
 	def resourse_check(self):
 
 		print('!!!!!!!!!!!!!!!!!!!!!!iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+		self.settings().setAttribute(QWebSettings.clearMemoryCaches(), True)
 		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 700000:
 			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)

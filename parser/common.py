@@ -9,10 +9,10 @@ check_signal_interval = 1 * 150
 # setup dynamic logging
 log_file_loc = '/var/log/sbp/'
 
-live_link = 'https://www.flashscore.com/'
+live_link = "https://www.flashscore.com/"
 
 
-statistics_num = 5
+statistics_num = 0
 
 europe = ["France", "England", "England", "Germany", "Spain", "Turkey", "Italy", "Portugal", "Belgium", "Hungary", "Russia", "Iceland", "Northern Ireland", "Ireland", "Czech Republic", "Albania", "Romania", "Wales", "Slovakia", "Ukraine", "Croatia", "Sweden", "Austria", "Poland"]
 
