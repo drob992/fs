@@ -38,7 +38,7 @@ class Collector(QWebPage):
 
 		self.EVENT = None
 
-		self.redis = redis.StrictRedis(host='localhost', port=6667, decode_responses=True, password=redis_pass)
+		self.redis = redis.StrictRedis(host=redis_master_host, port=redis_master_port, decode_responses=True, password=redis_pass)
 
 		self._url = QUrl(page_link)
 		self._req = QNetworkRequest(self._url)
@@ -98,10 +98,7 @@ class Collector(QWebPage):
 			self.first_load = False
 
 	def open_day(self):
-
-		print("1111111111111111111111")
 		main = self._frame.findFirstElement("#fsbody")
-		print(len(main.toPlainText()))
 		if len(main.toPlainText()) > 20:
 
 			# Otvaramo zeljeni datum (max 7 dana napred nazad od danasnjeg datuma)
@@ -113,14 +110,10 @@ class Collector(QWebPage):
 
 			QTimer().singleShot(3000, self.open_finished)
 		else:
-			print("~~~~~~~")
 			self.reload_collector()
-
-		print("11111111111!!!!!!!!!!!!!!!!!!!")
 
 	def open_finished(self):
 
-		print("22222222")
 		main = self._frame.findFirstElement("#fsbody")
 
 		# Otvaramo tab zavrsene utakmice
@@ -129,11 +122,8 @@ class Collector(QWebPage):
 
 		QTimer().singleShot(3000, self.parse)
 
-		print("222222222!!!!!!!!!!!!!!!!!!!")
-
 	def parse(self):
 
-		print("33333333333")
 		main = self._frame.findFirstElement("#fsbody")
 		tr = main.findAll("#fs").at(0).findAll(".table-main").at(0).findAll("tr")
 
@@ -170,11 +160,6 @@ class Collector(QWebPage):
 
 							self.redis.sadd("team_names", home)
 
-						print(country_part, tournament_part)
-						print(time, " - ", home, " - ", away, " - ", score, " - ", win_lose, " - ", id)
-
-			print("333333333333335!!!!!!!!!!!!!!!!!!")
-
 			QTimer().singleShot(5000, self.match_statistics)
 		else:
 			if self.checker_team == 5:
@@ -182,25 +167,18 @@ class Collector(QWebPage):
 				self.reload_collector()
 			else:
 				self.checker_team += 1
-				print("++++++++++++++++++ 11111111111111111111111111  checker " + str(self.checker_team))
 				QTimer().singleShot(1000, self.parse)
 
 	def match_statistics(self):
 
 		team_names = self.redis.smembers("team_names")
-		print("POKUSAO SAM")
 		for team in team_names:
 
 			# self.statistics.stop()
 			matches = self.redis.hgetall("team-{}".format(team))
-			print("STVARNO")
 			if matches:
-
-				# cmd = 'python3 {}parser/classes/collector_statistics.py'.format(project_root_path)  #
-				cmd = 'python3.4 {}parser/classes/collector_statistics.py'.format(project_root_path)  #
 				allready_running = None
 				pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
-				print("MAJKE MI")
 				for pid in pids:
 					try:
 						tst = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()
@@ -212,42 +190,13 @@ class Collector(QWebPage):
 					except IOError:  # proc has already terminated
 						continue
 
-				print(allready_running)
-				print("JEL RADI")
 				if not allready_running:
 					print("PUSTAM")
-					# cmd += " (1)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd += " (2)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd += " (3)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd += " (4)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd += " (5)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd += " (6)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd += " (7)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd += " (8)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd += " (9)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd += " (10)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					for i in range(0, common.statistics_num):
+						cmd = 'xvfb-run -a python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
+						subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+						time.sleep(2)
 					sys.exit()
-				else:
-					print("RADI")
 			break
 
 
@@ -257,8 +206,8 @@ class Collector(QWebPage):
 		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 700000:
 			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-			self.reload_collector()
 			print("Presao limit")
+			self.reload_collector()
 
 	def reload_collector(self):
 		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
@@ -266,10 +215,8 @@ class Collector(QWebPage):
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_per_day" in proces_name and '/bin/sh' not in proces_name:
-					print("eeeeeee")
 					# relaunch_cmd = "python3 {}".format(proces_name[10:-2])
 					relaunch_cmd = "python3.4 {}".format(proces_name[12:-2])
-					print(relaunch_cmd)
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()
 			except IOError:
@@ -278,7 +225,7 @@ class Collector(QWebPage):
 
 if __name__ == "__main__":
 
-	collector_log = util.parserLog('/var/log/sbp/flashscore/collector_per_day.log', 'flashscore-collector')
+	collector_log = util.parserLog('/var/log/sbp/flashscore/collector_per_day.log', 'flashscore-collector-per-day')
 
 	day = sys.argv[-1]
 	# todo: if gui in sys.argv True

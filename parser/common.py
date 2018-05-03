@@ -11,61 +11,10 @@ log_file_loc = '/var/log/sbp/'
 
 live_link = 'https://www.flashscore.com/'
 
-tip_bet_allowed_sports = [
-	'Soccer',
-	# 'Tennis',
-
-	# 'Handball',
-	# 'Volleyball',
-	# 'Basketball',
-	# 'Ice Hockey',
-
-	# 'American Football',
-	# 'Baseball',
-	# 'Golf',
-	# 'Water Polo',
-	# 'Futsal',
-	# 'Cricket',
-	# 'Darts',
-	# 'Rugby League',
-	# 'Rugby Union',
-	# 'Speedway',
-]
-
-window_not_active_limit = {
-	'Football': 20,
-	'Tennis': 120,
-	'Basketball': 120,
-	'Hockey': 180,
-	'Handball': 120,
-	'Volleyball': 120,
-	'NFL': 120,
-	'RugbyUnion': 120,
-
-	'Futsal': 15,
-	'Beach Volleyball': 15,
-	'Table Tennis': 15,
-	'Baseball': 120,
-	'Golf': 15,
-	'Horse Racing': 15,
-	'Cricket': 15,
-	'Darts': 15,
-	'E Sports': 15,
-	'Greyhounds': 15,
-	'Rugby League': 15,
-	'Speedway': 15,
-}
-delay_after_ft = 15
-single_event_ttl = 1800
-kickof_time_offset = 1
 
 statistics_num = 5
 
-# europe = ["France", "England", "England", "Germany", "Spain", "Turkey", "Italy", "Portugal", "Belgium", "Hungary", "Russia", "Iceland"]
-europe = ["Northern Ireland", "Ireland"]
-
-europe_2 = ["Czech Republic", "Albania", "Romania", "Wales", "Slovakia", "Ukraine", "Croatia", "Sweden", "Austria", "Poland"]
-
+europe = ["France", "England", "England", "Germany", "Spain", "Turkey", "Italy", "Portugal", "Belgium", "Hungary", "Russia", "Iceland", "Northern Ireland", "Ireland", "Czech Republic", "Albania", "Romania", "Wales", "Slovakia", "Ukraine", "Croatia", "Sweden", "Austria", "Poland"]
 
 master_servers = ["master", "stefan-desktop", "www-desktop"]
 node_servers = ["premier", "parser2", "igor-desktop", "www-desktop"]

@@ -38,7 +38,7 @@ class Collector(QWebPage):
 
 		self.EVENT = None
 
-		self.redis = redis.StrictRedis(host='localhost', port=redis_master_port, decode_responses=True, password=redis_pass)
+		self.redis = redis.StrictRedis(host=redis_master_host, port=redis_master_port, decode_responses=True, password=redis_pass)
 
 		self._url = QUrl(page_link)
 		self._req = QNetworkRequest(self._url)
@@ -94,7 +94,6 @@ class Collector(QWebPage):
 	@pyqtSlot()
 	def read_page(self):
 		if self.first_load:
-			print("1111111111111111111111111111111111111111111111")
 
 			self.hash = QTimer()
 			self.hash.timeout.connect(self.check_hash)
@@ -104,11 +103,10 @@ class Collector(QWebPage):
 			self.first_load = False
 
 	def check_hash(self):
-		print("222222222222222222222222222222222222222222222222")
+
 		self._check_hash_counter += 1
 		if self._check_hash_counter == 6:
 			self.log.info("\nCheck hash brojac i limit za neaktivnost su se poklopili, restartujemo stranu")
-			print("\nCheck hash brojac i limit za neaktivnost su se poklopili, restartujemo stranu")
 			self.redis.hdel("processed", self.team, self.i)
 			self.reload_collector()
 		else:
@@ -120,7 +118,6 @@ class Collector(QWebPage):
 				self.log.info("{} sekundi nema promena na prozoru ".format(self._check_hash_counter))
 				if self._check_hash_counter == 6:
 					self.log.critical("Resetujemo prozor, nije bilo promena do zadatog limita")
-					print("Resetujemo prozor, nije bilo promena do zadatog limita")
 					self.redis.hdel("processed", self.team, self.i)
 					self.reload_collector()
 			else:
@@ -131,13 +128,10 @@ class Collector(QWebPage):
 	def match_statistics(self):
 
 		team_names = self.redis.smembers("team_names")
-		# print(len(team_names), "stefan 11111")
 
 		if len(team_names) == 0:
-			print(len(team_names), "stefan 11111")
 			time.sleep(5)
-			# cmd = 'python3 {}parser/stop.py'.format(project_root_path)
-			cmd = 'python3.4 {}parser/stop.py'.format(project_root_path)
+			cmd = 'xvfb-run -a python3 {}parser/stop.py'.format(project_root_path)
 			subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 			QTimer().singleShot(30000, self.match_statistics)
 
@@ -149,21 +143,15 @@ class Collector(QWebPage):
 
 			if len(matches) == 0 or team in ["", " ", None]:
 				try:
-					print(len(matches), "stefan 222222")
-					print("\n\n\n\nOOOOOOOOOOOOOOOOOOOOOO\n\n\n\n")
 					self.redis.srem("team_names", team)
 					continue
 				except:
+					self.log.error("Ne moze da uradi brisanje")
 					print("Ne moze da uradi brisanje")
 					continue
 			else:
-				# print("LETS BEGIN")
 				for i in matches:
-
-					print(team, i, " order_num {}\n\n".format(order_num))
-
 					if self.redis.hget("processed", team) == i:
-						print("\nOBRADJENOOOOOOOOOO", team, i, "\n")
 						QTimer().singleShot(2000, self.match_statistics)
 						break
 
@@ -172,7 +160,6 @@ class Collector(QWebPage):
 
 					match = json.loads(matches[i])
 
-					# print("https://www.flashscore.com/match/{}/#match-summary".format(match['flashscore_id']))
 					self._frame.load(QNetworkRequest(QUrl("https://www.flashscore.com/match/{}/#match-summary".format(match['flashscore_id']))))
 
 					self.summary_click = True
@@ -193,19 +180,17 @@ class Collector(QWebPage):
 				util.simulate_click(summary_btn)
 				self.summary_click = False
 				QTimer().singleShot(3500, self.parse_statistics)
-				# print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 			except Exception as e:
 				self.summary_click = False
 				QTimer().singleShot(3000, self.parse_statistics)
-				print("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!puklo na klik statistics!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n", e)
 		else:
 			try:
 				try:
 					main = self._frame.findFirstElement("#summary-content")
 					rows = main.findAll("tr")
 				except Exception as e:
+					self.log.error("\nNe mogu da nadjem stranicu\norder_num = ", self.order_num)
 					print("\nNe mogu da nadjem stranicu\norder_num = ", self.order_num)
-
 					self.reload_collector()
 
 				self.period = None
@@ -283,23 +268,24 @@ class Collector(QWebPage):
 						summary_btn = self._frame.findFirstElement("#a-match-statistics")
 						util.simulate_click(summary_btn)
 					except Exception as e:
-						print(e)
+						self.log.error("parse_statistics [1]", e)
 
 					main = self._frame.findFirstElement("#tab-statistics-0-statistic")
 					rows = main.findAll('tr')
 
-					print("33333333333333333333333333333333333333333333333333")
 					for i in range(len(rows)):
-						print("44444444444444444444444444444444444444444444444444444")
 						stats_name = rows.at(i).findAll('td').at(1).toPlainText().strip()
 						stats_team1 = rows.at(i).findAll('td').at(0).toPlainText().strip()
 						stats_team2 = rows.at(i).findAll('td').at(2).toPlainText().strip()
 						statistics[stats_name] = {'team1': stats_team1, 'team2': stats_team2}
 						print(statistics[stats_name])
 				except Exception as e:
+					self.log.error("\nPotraga za statistikom nije uspela\n", e)
 					print("\nPotraga za statistikom nije uspela\n", e)
 
 			except Exception as e:
+				self.log.error("Puklo na STATISTICS order_num = ", self.order_num, e)
+				self.log.error("Puklo na SUMMARY order_num = ", self.order_num, e)
 				self.redis.hdel("processed", self.team, self.i)
 				print("Puklo na STATISTICS order_num = ", self.order_num, e)
 				print("Puklo na SUMMARY order_num = ", self.order_num, e)
@@ -327,6 +313,7 @@ class Collector(QWebPage):
 				self.summary_click = True
 				QTimer().singleShot(2000, self.match_statistics)
 			except Exception as e:
+				self.log.error("Doslo je do otvaranja istog eventa u 2 prozora, vec je upisan", self.team, self.i, "--", e)
 				print("Doslo je do otvaranja istog eventa u 2 prozora, vec je upisan", self.team, self.i, "--", e)
 				self.redis.hdel("processed", self.team, self.i)
 				QTimer().singleShot(2000, self.match_statistics)
@@ -338,8 +325,8 @@ class Collector(QWebPage):
 		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 600000:
 			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-			self.reload_collector()
 			print("Presao limit\norder_num = ", self.order_num)
+			self.reload_collector()
 
 	def reload_collector(self):
 		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
@@ -347,8 +334,7 @@ class Collector(QWebPage):
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_statistics" in proces_name and str(self.order_num) in proces_name and '/bin/sh' not in proces_name:
-					# relaunch_cmd = "python3 collector_statistics.py {}".format(self.order_num)
-					relaunch_cmd = "python3.4 collector_statistics.py {}".format(self.order_num)
+					relaunch_cmd = "xvfb-run -a python3 collector_statistics.py {}".format(self.order_num)
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()
 			except IOError:

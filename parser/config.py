@@ -3,17 +3,13 @@ import socket
 
 hostname = socket.gethostname()
 
-project_root_path = '/home/stex92/work/flashscore/'
-if hostname == "www-desktop":
-    redis_master_host = '192.168.1.5'
-elif hostname == "www-desktop":
-    redis_master_host = '192.168.1.5'
-else:
-    redis_master_host = 'localhost'
+project_root_path = '/home/www/work/flashscore/'
+
+redis_master_host = 'master'
 
 
 redis_admin_host = 'localhost'
-redis_master_port = 6666
+redis_master_port = 6668
 redis_admin_port = 3108
 redis_pass = 'pr3mi3r'
 

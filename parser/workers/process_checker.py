@@ -9,7 +9,7 @@ import util
 import redis
 import time
 
-command_listener_log = util.parserLog('/var/log/sbp/flashscore/command_listener.log', 'bet356live-info')
+command_listener_log = util.parserLog('/var/log/sbp/flashscore/command_listener.log', 'flashscore-info')
 
 rdb = redis.StrictRedis(host='localhost', port=redis_master_port, decode_responses=True, password=redis_pass)
 
@@ -26,8 +26,7 @@ def check_statistics_activity():
 
     if common.statistics_num - num != 0:
         for i in range(common.statistics_num):
-            # cmd = 'python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)  #
-            cmd = 'python3.4 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
+            cmd = 'xvfb-run -a python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
             subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 
 
@@ -43,8 +42,7 @@ def check_league_activity():
             continue
 
     if (active is False and (not rdb.get("parse_teams") or len(rdb.smembers('team_links')) != 0 or not rdb.get("parse_leagues"))) or rdb.get("leagues_active") == "False":
-        # relaunch_cmd = "python3 {}parser/classes/collector_leagues.py".format(project_root_path)
-        relaunch_cmd = "python3.4 {}parser/classes/collector_leagues.py".format(project_root_path)
+        relaunch_cmd = "xvfb-run -a python3 {}parser/classes/collector_leagues.py".format(project_root_path)
         subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
         time.sleep(1)
 
