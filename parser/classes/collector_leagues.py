@@ -91,7 +91,7 @@ class Collector(QWebPage):
 	def read_page(self):
 
 		if self.first_load:
-
+			print("Lets GO")
 			if self.redis.get("restart_standings") and self.redis.get("restart_standings") == "True":
 				self.redis.set("restart_standings", False)
 				link = self.redis.get("s-link")
