@@ -98,14 +98,13 @@ class Collector(QWebPage):
 
 			self.hash = QTimer()
 			self.hash.timeout.connect(self.check_hash)
-			self.hash.start(10000)
+			self.hash.start(5000)
 
 			QTimer().singleShot(2000, self.match_statistics)
 			self.first_load = False
 
 	def check_hash(self):
 		print("222222222222222222222222222222222222222222222222")
-
 		self._check_hash_counter += 1
 		if self._check_hash_counter == 6:
 			self.log.info("\nCheck hash brojac i limit za neaktivnost su se poklopili, restartujemo stranu")

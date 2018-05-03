@@ -6,50 +6,52 @@ sys.path.insert(0, '../')
 from config import *
 import common
 import util
+import redis
+import time
 
 command_listener_log = util.parserLog('/var/log/sbp/flashscore/command_listener.log', 'bet356live-info')
 
-#ZA SADA POSTOJI SAMO ZA KOLEKTOR
+rdb = redis.StrictRedis(host='localhost', port=redis_master_port, decode_responses=True, password=redis_pass)
 
-def reload_collector(sport):
-
+def check_statistics_activity():
+    num = 0
     pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
-    # print(sport)
-    check_if_open = 0
     for pid in pids:
         try:
             proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
-            if sport in proces_name and "collector" in proces_name and '/bin/sh' not in proces_name:
-                check_if_open += 1
+            if "collector_statistics" in proces_name and '/bin/sh' not in proces_name:
+                num += 1
         except IOError:
             continue
 
-    if check_if_open == 0:
-        relaunch_cmd = "xvfb-run -a python3 {}classes/collector.py {}".format(project_root_path, sport)  #
-        # print(relaunch_cmd)
+    if common.statistics_num - num != 0:
+        for i in range(common.statistics_num):
+            # cmd = 'python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)  #
+            cmd = 'python3.4 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
+            subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+
+
+def check_league_activity():
+    active = False
+    pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+    for pid in pids:
+        try:
+            proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
+            if "collector_leagues" in proces_name and '/bin/sh' not in proces_name:
+                active = True
+        except IOError:
+            continue
+
+    if active is False and (not rdb.get("parse_teams") or len(rdb.smembers('team_links')) != 0 or not rdb.get("parse_leagues")):
+        # relaunch_cmd = "python3 {}parser/classes/collector_leagues.py".format(project_root_path)
+        relaunch_cmd = "python3.4 {}parser/classes/collector_leagues.py".format(project_root_path)
         subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
-        command_listener_log.info("Procces_checker - open sport {}".format(sport))
-    else:
-        command_listener_log.info("Procces_checker - All OK")
+        time.sleep(1)
 
-def check_parser_activity():
-
-    pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
-    activity = False
-    for pid in pids:
-        try:
-            proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
-            if "emmiter" in proces_name or "enqueuer" in proces_name:
-                activity = True
-        except IOError:
-            continue
-
-    return activity
 
 if __name__ == '__main__':
 
-    sports = common.tip_bet_allowed_sports
-    activity = check_parser_activity()
-    if activity is True:
-        for sport in sports:
-            reload_collector(sport)
+    check_statistics_activity()
+
+    check_league_activity()
+

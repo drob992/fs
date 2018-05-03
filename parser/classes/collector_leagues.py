@@ -170,13 +170,13 @@ class Collector(QWebPage):
 							league = league_list.at(x).findAll("a").at(0)
 
 							# Uzimamo samo Bundesliga
-							if league.toPlainText().strip() not in ["Premier League"]:
-								if "cup" not in league.toPlainText().lower().strip():
-									print(league.toPlainText().strip())
-									self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
-									self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
-									# print(league.toPlainText().strip())
-									# print("----------------------------")
+							if league.toPlainText().strip():
+								# if "cup" not in league.toPlainText().lower().strip():
+								print(league.toPlainText().strip())
+								self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
+								self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
+								# print(league.toPlainText().strip())
+								# print("----------------------------")
 
 			for i in range(0, len(country_list1)):
 				if country_list1.at(i).hasAttribute("id"):
@@ -195,13 +195,13 @@ class Collector(QWebPage):
 							league = league_list.at(x).findAll("a").at(0)
 
 							# Uzimamo samo Bundesliga
-							if league.toPlainText().strip() not in ["Premier League"]:
-								if "cup" not in league.toPlainText().lower().strip():
-									print(league.toPlainText().strip())
-									self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
-									self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
-									# print(league.toPlainText().strip())
-									# print("----------------------------")
+							if league.toPlainText().strip():
+								# if "cup" not in league.toPlainText().lower().strip():
+								print(league.toPlainText().strip())
+								self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
+								self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
+								# print(league.toPlainText().strip())
+								# print("----------------------------")
 
 			# Posto smo gore izbacili "Other Competitions" moramo rucno dodati world_cup
 			# self.redis.sadd('leagues_links', "https://www.flashscore.com/football/world/world-cup/")
@@ -219,7 +219,7 @@ class Collector(QWebPage):
 		league_links = self.redis.smembers('leagues_links')
 
 		if self.redis.get("parse_teams"):
-
+			print("333111111")
 			team_links = self.redis.smembers('team_links')
 
 			if len(team_links) == 0:
@@ -240,8 +240,11 @@ class Collector(QWebPage):
 				break
 
 		else:
+			print("33312222")
 			# Prvo otvaramo lige, kada dodjemo do kraja, setujemo parse_teams na True da bi ulazili u if iznad
 			if len(league_links) in [0, 1]:
+				print("3331444441")
+				print(len(league_links))
 				self.redis.set("parse_teams", True)
 
 			for link in league_links:
@@ -303,8 +306,14 @@ class Collector(QWebPage):
 				# print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 				# print(team.toPlainText(), played, wins, draws, losses, goals, points)
 
-		print("bubble", len(bubble))
-		if bubble:
+		print("###################################")
+		print("bubble", (bubble.toPlainText().strip()))
+		print(main.findAll(".bubble").at(0).findAll("li").at(0).hasClass("selected"))
+		print(main.findAll(".bubble").at(0).findAll("li").at(0).attribute("class"))
+		print(bubble)
+		print("!!!!!!!!!!!!!!!!!!!!!!!!")
+		if len(bubble.toPlainText().strip()) > 1 and not main.findAll(".bubble").at(0).findAll("li").at(0).hasClass("selected"):
+			print("KLIKNUO")
 			util.simulate_click(bubble)
 			QTimer().singleShot(4000, self.get_teams_standings)
 
@@ -454,35 +463,11 @@ class Collector(QWebPage):
 				print("JEL RADI")
 				if not allready_running:
 					print("PUSTAM")
-					cmd += " (1)"
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd = cmd.replace("(1)", "(2)")
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd = cmd.replace("(2)", "(3)")
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd = cmd.replace("(3)", "(4)")
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd = cmd.replace("(4)", "(5)")
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd = cmd.replace("(5)", "(6)")
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd = cmd.replace("(6)", "(7)")
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd = cmd.replace("(7)", "(8)")
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd = cmd.replace("(8)", "(9)")
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-					# time.sleep(2)
-					# cmd = cmd.replace("(9)", "(10)")
-					# subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+					for i in range(0, common.statistics_num):
+						# cmd = 'python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)  #
+						cmd = 'python3.4 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
+						subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
+						time.sleep(2)
 				else:
 					print("RADI")
 			break
