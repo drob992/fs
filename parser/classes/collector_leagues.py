@@ -46,8 +46,8 @@ class Collector(QWebPage):
 		self._req.setRawHeader(b"Cache-Control", b"no-cache")
 		self._req.setRawHeader(b"Connection", b"keep-alive")
 		self._req.setRawHeader(b"User-Agent", common.uAgent)
-		# self._req.setRawHeader(b"Origin", b"https://www.flashscore.com/")
-		# self._req.setRawHeader(b"Referer", b"https://www.flashscore.com/")
+		self._req.setRawHeader(b"Origin", b"https://www.flashscore.com/")
+		self._req.setRawHeader(b"Referer", b"https://www.flashscore.com/")
 		self._req.setRawHeader(b"Upgrade-Insecure-Requests", b"1")
 		self._req.setRawHeader(b"Pragma", b"no-cache")
 		self._req.setRawHeader(b"X-Requested-With", b"XMLHttpRequest")
@@ -92,7 +92,14 @@ class Collector(QWebPage):
 
 		if self.first_load:
 			print("Lets GO")
+
+			self.statistics = QTimer()
+			self.statistics.timeout.connect(self.match_statistics)
+			self.statistics.start(10000)
+
 			if self.redis.get("restart_standings") and self.redis.get("restart_standings") == "True":
+				print("restart_standings")
+				print(self.redis.get("restart_standings"))
 				self.redis.set("restart_standings", False)
 				link = self.redis.get("s-link")
 				self._frame.load(QNetworkRequest(QUrl(link)))
@@ -100,6 +107,8 @@ class Collector(QWebPage):
 				self.first_load = False
 
 			elif self.redis.get("restart_team") and self.redis.get("restart_team") == "True":
+				print("restart_team")
+				print(self.redis.get("restart_team"))
 				self.redis.set("restart_team", False)
 				link = self.redis.get("t-link")
 				self._frame.load(QNetworkRequest(QUrl(link + "results")))
@@ -107,10 +116,7 @@ class Collector(QWebPage):
 				self.first_load = False
 
 			else:
-				self.statistics = QTimer()
-				self.statistics.timeout.connect(self.match_statistics)
-				self.statistics.start(10000)
-
+				print("OVDE SAM")
 				QTimer().singleShot(2000, self.open_country_menu)
 
 				self.active = QTimer()
@@ -121,10 +127,11 @@ class Collector(QWebPage):
 
 	def leagues_active(self):
 		self.redis.set("leagues_active", True)
+		print("www")
 		self.redis.expire("leagues_active", 30)
 
 	def open_country_menu(self):
-
+		print("qqq")
 		main = self._frame.findFirstElement("#main")
 
 		# Mora se raditi iz dva dela, zato sto je kod njih lista u dva diva iz dva dela
@@ -147,6 +154,7 @@ class Collector(QWebPage):
 
 	def get_league_links(self):
 
+		print("eee")
 		main = self._frame.findFirstElement("#main")
 
 		# Mora se raditi iz dva dela, zato sto je kod njih lista u dva diva iz dva dela
@@ -206,6 +214,7 @@ class Collector(QWebPage):
 
 	def open_leagues(self):
 
+		print("ttt")
 		league_links = self.redis.smembers('leagues_links')
 
 		if self.redis.get("parse_teams") and self.redis.get("parse_teams") == "True":
@@ -248,6 +257,7 @@ class Collector(QWebPage):
 
 	def get_teams_standings(self):
 
+		print("uuu")
 		bubble = None
 		groups = None
 		groups_draw = None
@@ -293,6 +303,7 @@ class Collector(QWebPage):
 
 			elif len(groups) == 0:
 				if self.checker == 5:
+					print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 					self.redis.set("restart_standings", True)
 					self.reload_collector()
 				else:
@@ -305,6 +316,7 @@ class Collector(QWebPage):
 
 	def parse_team(self):
 
+		print("iiii")
 		self.redis.set("restart_standings", False)
 		self.redis.set("restart_team", False)
 
@@ -388,9 +400,10 @@ class Collector(QWebPage):
 
 	def match_statistics(self):
 
+		print("0000000000")
 		team_names = self.redis.smembers("team_names")
 		for team in team_names:
-
+			print("1111111111111")
 			matches = self.redis.hgetall("team-{}".format(team))
 			if matches:
 				allready_running = None
@@ -406,9 +419,15 @@ class Collector(QWebPage):
 					except IOError:  # proc has already terminated
 						continue
 
+				print("222222222")
 				if not allready_running:
+					print("33333")
+					print(common.statistics_num)
 					for i in range(0, common.statistics_num):
-						cmd = 'xvfb-run -a python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
+						print("44444444")
+						cmd = 'python3.4 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
+						print(cmd)
+						# cmd = 'xvfb-run -a python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
 						subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 						time.sleep(2)
 			break
@@ -417,7 +436,6 @@ class Collector(QWebPage):
 	def resourse_check(self):
 
 		print('!!!!!!!!!!!!!!!!!!!!!!iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-		self.settings().setAttribute(QWebSettings.clearMemoryCaches(), True)
 		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 700000:
 			self.log.error('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -430,7 +448,9 @@ class Collector(QWebPage):
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_leagues" in proces_name and '/bin/sh' not in proces_name:
-					relaunch_cmd = "xvfb-run -a python3 {}".format(proces_name[10:-2])
+					relaunch_cmd = "python3.4 {}".format(proces_name[12:-2])
+					print(relaunch_cmd)
+					# relaunch_cmd = "xvfb-run -a python3 {}".format(proces_name[10:-2])
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()
 			except IOError:

@@ -47,8 +47,8 @@ class Collector(QWebPage):
 		self._req.setRawHeader(b"Cache-Control", b"no-cache")
 		self._req.setRawHeader(b"Connection", b"keep-alive")
 		self._req.setRawHeader(b"User-Agent", common.uAgent)
-		# self._req.setRawHeader(b"Origin", b"https://www.flashscore.com/")
-		# self._req.setRawHeader(b"Referer", b"https://www.flashscore.com/")
+		self._req.setRawHeader(b"Origin", b"https://www.flashscore.com/")
+		self._req.setRawHeader(b"Referer", b"https://www.flashscore.com/")
 		self._req.setRawHeader(b"Upgrade-Insecure-Requests", b"1")
 		self._req.setRawHeader(b"Pragma", b"no-cache")
 		self._req.setRawHeader(b"X-Requested-With", b"XMLHttpRequest")
@@ -131,7 +131,8 @@ class Collector(QWebPage):
 
 		if len(team_names) == 0:
 			time.sleep(5)
-			cmd = 'xvfb-run -a python3 {}parser/stop.py'.format(project_root_path)
+			cmd = 'python3.4 {}parser/stop.py'.format(project_root_path)
+			# cmd = 'xvfb-run -a python3 {}parser/stop.py'.format(project_root_path)
 			subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 			QTimer().singleShot(30000, self.match_statistics)
 
@@ -254,14 +255,20 @@ class Collector(QWebPage):
 							team2.append(time)
 							time = {}
 
-					if self.text_left not in [" ", "", None]:
-						summary[self.period]["team1"] = team1
+					if self.period not in [" ", "", None]:
+						print("period", self.period)
+						if self.text_left not in [" ", "", None]:
+							print("text_left", self.period)
+							summary[self.period]["team1"] = team1
 
-					if self.text_right not in [" ", "", None]:
-						summary[self.period]["team2"] = team2
+						if self.text_right not in [" ", "", None]:
+							print("text_right", self.period)
+							summary[self.period]["team2"] = team2
 
-					if self.score not in [" ", "", None]:
-						summary[self.period]["score"] = self.score
+						if self.score not in [" ", "", None]:
+							print("score", self.period)
+							print(self.score)
+							summary[self.period]["score"] = self.score
 
 				try:
 					try:
@@ -322,7 +329,6 @@ class Collector(QWebPage):
 	def resourse_check(self):
 
 		# print('!!!!!!!!!!!!!!!!!!!!!!iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-		self.settings().setAttribute(QWebSettings.clearMemoryCaches(), True)
 		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 600000:
 			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -335,7 +341,8 @@ class Collector(QWebPage):
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_statistics" in proces_name and str(self.order_num) in proces_name and '/bin/sh' not in proces_name:
-					relaunch_cmd = "xvfb-run -a python3 collector_statistics.py {}".format(self.order_num)
+					relaunch_cmd = "python3.4 collector_statistics.py {}".format(self.order_num)
+					# relaunch_cmd = "xvfb-run -a python3 collector_statistics.py {}".format(self.order_num)
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()
 			except IOError:

@@ -193,7 +193,8 @@ class Collector(QWebPage):
 				if not allready_running:
 					print("PUSTAM")
 					for i in range(0, common.statistics_num):
-						cmd = 'xvfb-run -a python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
+						cmd = 'python3.4 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
+						# cmd = 'xvfb-run -a python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
 						subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 						time.sleep(2)
 					sys.exit()
@@ -203,7 +204,6 @@ class Collector(QWebPage):
 	def resourse_check(self):
 
 		print('!!!!!!!!!!!!!!!!!!!!!!iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-		self.settings().setAttribute(QWebSettings.clearMemoryCaches(), True)
 		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 700000:
 			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -216,8 +216,8 @@ class Collector(QWebPage):
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_per_day" in proces_name and '/bin/sh' not in proces_name:
-					# relaunch_cmd = "python3 {}".format(proces_name[10:-2])
 					relaunch_cmd = "python3.4 {}".format(proces_name[12:-2])
+					# relaunch_cmd = "xvfb-run -a python3 {}".format(proces_name[10:-2])
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()
 			except IOError:
