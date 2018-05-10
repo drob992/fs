@@ -11,6 +11,6 @@ __pycache__/
 *.log
 
 
-config.py
+parser/config.py
 
-config-samples/localhost/*
+parser/config-samples/localhost/*
