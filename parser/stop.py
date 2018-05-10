@@ -20,7 +20,7 @@ for pid in pids:
 		tst = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()
 
 		for filename in processes:
-			if filename in str(tst):
+			if filename in str(tst) and "-platform" in str(tst):
 				os.kill(int(pid), signal.SIGTERM)
 
 	except IOError:  # proc has already terminated
