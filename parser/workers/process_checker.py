@@ -53,5 +53,5 @@ if __name__ == '__main__':
 
     check_statistics_activity()
 
-    check_league_activity()
+    # check_league_activity()
 
