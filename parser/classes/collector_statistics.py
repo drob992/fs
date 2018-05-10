@@ -131,7 +131,7 @@ class Collector(QWebPage):
 
 		if len(team_names) == 0:
 			time.sleep(5)
-			cmd = 'python3.4 {}parser/stop.py'.format(project_root_path)
+			cmd = 'python3 {}parser/stop.py'.format(project_root_path)
 			# cmd = 'xvfb-run -a python3 {}parser/stop.py'.format(project_root_path)
 			subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 			QTimer().singleShot(30000, self.match_statistics)
@@ -341,7 +341,7 @@ class Collector(QWebPage):
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_statistics" in proces_name and str(self.order_num) in proces_name and '/bin/sh' not in proces_name:
-					relaunch_cmd = "python3.4 collector_statistics.py {}".format(self.order_num)
+					relaunch_cmd = "python3 collector_statistics.py -platform minimal"
 					# relaunch_cmd = "xvfb-run -a python3 collector_statistics.py {}".format(self.order_num)
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()

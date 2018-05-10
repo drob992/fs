@@ -1,0 +1,37 @@
+# -*- coding: utf-8 -*-
+import socket
+hostname = socket.gethostname()
+project_root_path = '/home/parser/work/lb365/'
+
+redis_admin_host = '146.185.189.19'
+redis_master_host = '188.93.124.15'
+redis_admin_port = 3108
+redis_master_port = 6666
+redis_pass = 'pr3mi3r'
+
+emmit2db_endpoint = ['http://stg.premierbet.me/svclive/events/push_results']
+emmit_redis_ch = 'bet365_feed_localhost'
+admin_redis_ch = 'bet365_comm_ch'
+
+nodes = [
+	{
+		'type': 'node',
+		'id': 'premier',
+		'ip': '188.93.124.62',
+		'r_channels': {
+			'commands': 'commands1',
+			'selected_events': 'active_events1',
+			'event_count': 'event_count1'
+		}
+	},
+	{
+		'type': 'node',
+		'id': 'parser2',
+		'ip': '188.93.125.222',
+		'r_channels': {
+			'commands': 'commands2',
+			'selected_events': 'active_events2',
+			'event_count': 'event_count2'
+		}
+	}
+]

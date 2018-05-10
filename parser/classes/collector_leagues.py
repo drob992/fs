@@ -257,7 +257,6 @@ class Collector(QWebPage):
 
 	def get_teams_standings(self):
 
-		print("uuu")
 		bubble = None
 		groups = None
 		groups_draw = None
@@ -303,7 +302,6 @@ class Collector(QWebPage):
 
 			elif len(groups) == 0:
 				if self.checker == 5:
-					print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 					self.redis.set("restart_standings", True)
 					self.reload_collector()
 				else:
@@ -400,10 +398,8 @@ class Collector(QWebPage):
 
 	def match_statistics(self):
 
-		print("0000000000")
 		team_names = self.redis.smembers("team_names")
 		for team in team_names:
-			print("1111111111111")
 			matches = self.redis.hgetall("team-{}".format(team))
 			if matches:
 				allready_running = None
@@ -419,13 +415,10 @@ class Collector(QWebPage):
 					except IOError:  # proc has already terminated
 						continue
 
-				print("222222222")
 				if not allready_running:
-					print("33333")
 					print(common.statistics_num)
 					for i in range(0, common.statistics_num):
-						print("44444444")
-						cmd = 'python3.4 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
+						cmd = 'python3 {}parser/classes/collector_statistics.py -platform minimal'.format(project_root_path)
 						print(cmd)
 						# cmd = 'xvfb-run -a python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
 						subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
@@ -436,7 +429,7 @@ class Collector(QWebPage):
 	def resourse_check(self):
 
 		print('!!!!!!!!!!!!!!!!!!!!!!iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 700000:
+		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 400000:
 			self.log.error('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -448,7 +441,8 @@ class Collector(QWebPage):
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_leagues" in proces_name and '/bin/sh' not in proces_name:
-					relaunch_cmd = "python3.4 {}".format(proces_name[12:-2])
+					print(proces_name[10:-2])
+					relaunch_cmd = "python3 {}".format(proces_name[10:-2])
 					print(relaunch_cmd)
 					# relaunch_cmd = "xvfb-run -a python3 {}".format(proces_name[10:-2])
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)

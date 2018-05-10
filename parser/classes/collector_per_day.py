@@ -193,7 +193,7 @@ class Collector(QWebPage):
 				if not allready_running:
 					print("PUSTAM")
 					for i in range(0, common.statistics_num):
-						cmd = 'python3.4 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
+						cmd = 'python3 {}parser/classes/collector_statistics.py -platform minimal'.format(project_root_path)
 						# cmd = 'xvfb-run -a python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
 						subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 						time.sleep(2)
@@ -216,7 +216,7 @@ class Collector(QWebPage):
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_per_day" in proces_name and '/bin/sh' not in proces_name:
-					relaunch_cmd = "python3.4 {}".format(proces_name[12:-2])
+					relaunch_cmd = "python3 {}".format(proces_name[10:-2])
 					# relaunch_cmd = "xvfb-run -a python3 {}".format(proces_name[10:-2])
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()

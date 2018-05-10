@@ -1,0 +1,66 @@
+# -*- coding: utf-8 -*-
+import socket
+hostname = socket.gethostname()
+
+LOG_DIR = '/var/log/sbp/flashscore/'
+
+project_root_path = '/home/parser/work/flashscore/'
+
+redis_admin_host = '52.17.73.0'
+redis_master_host = '188.93.124.15'
+redis_admin_port = 3108
+redis_master_port = 6668
+redis_pass = 'pr3mi3r'
+
+endpoint_rdb_ch_sets = {
+    'production': {
+        'publish_ch': 'bet365_feed_prod',
+        'endpoint': 'https://premierbet.me/svclive/events/bet365/feed',
+        'hide_quotas_api': 'http://premierbet.me/svclive/event/set_enable_for_betting'
+    },
+    'bet_52': {
+        'publish_ch': 'bet365_feed_bet52',
+        'endpoint': 'http://admin-bh.premierbet.me/svclive/events/bet365/feed',
+        'hide_quotas_api': 'http://admin-bh.premierbet.me/svclive/event/set_enable_for_betting'
+    },
+    'gambija': {
+        'publish_ch': 'bet365_feed_bet52',
+        'endpoint': 'http://admin-gmb.premierbet.me/svclive/events/bet365/feed',
+        'hide_quotas_api': 'http://admin-gmb.premierbet.me/svclive/event/set_enable_for_betting'
+    },
+    'atlantic': {
+        'publish_ch': 'bet365_feed_atl',
+        'endpoint': 'http://atlanticnet.me/svclive/events/bet365/feed',
+        'hide_quotas_api': 'http://atlanticnet.me/svclive/event/set_enable_for_betting'
+    },
+    'staging': {
+        'publish_ch': 'bet365_feed_stg',
+        'endpoint': 'http://stg.premierbet.me/svclive/events/bet365/feed',
+        'hide_quotas_api': 'http://stg.premierbet.me/svclive/event/set_enable_for_betting'
+    }
+}
+
+admin_redis_ch = 'bet365_comm_ch'
+
+nodes = [
+	{
+		'type': 'node',
+		'id': 'premier',
+		'ip': '188.93.124.62',
+		'r_channels': {
+			'commands': 'commands1',
+			'selected_events': 'active_events1',
+			'event_count': 'event_count1'
+		}
+	},
+	{
+		'type': 'node',
+		'id': 'parser2',
+		'ip': '188.93.125.222',
+		'r_channels': {
+			'commands': 'commands2',
+			'selected_events': 'active_events2',
+			'event_count': 'event_count2'
+		}
+	}
+]
