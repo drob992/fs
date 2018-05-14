@@ -388,12 +388,18 @@ class Collector(QWebPage):
 			QTimer().singleShot(1500, self.resourse_check)
 			QTimer().singleShot(2500, self.open_leagues)
 		else:
-			if self.checker_team == 5:
-				self.redis.set("restart_team", True)
-				self.reload_collector()
+			no_match_found = main.findAll("#fs-results").at(0).toPlainText().strip()
+			if "No match found." not in no_match_found:
+				if self.checker_team == 5:
+					self.redis.set("restart_team", True)
+					self.reload_collector()
+				else:
+					self.checker_team += 1
+					QTimer().singleShot(1000, self.parse_team)
 			else:
-				self.checker_team += 1
-				QTimer().singleShot(1000, self.parse_team)
+				print("NEMAAAAAAAAAAAAAAAA")
+				self.redis.sadd("team_names", team_name)
+				QTimer().singleShot(2500, self.open_leagues)
 
 	def match_statistics(self):
 
