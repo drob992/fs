@@ -452,7 +452,7 @@ class Collector(QWebPage):
 						# cmd = 'python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
 						# print(cmd)
 						subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-						time.sleep(2)
+						time.sleep(1)
 						pass
 			break
 
