@@ -10,7 +10,7 @@ import redis
 if hostname in common.master_servers and not util.check_local_dev():
 	processes = ['starter', 'collector', 'enqueuer', 'defunct', 'emmiter', 'event_finisher', 'xvfb-run', 'inactive_single_process']
 elif hostname in common.node_servers and not util.check_local_dev():
-	processes = ['starter', 'single', 'defunct', 'xvfb-run']
+	processes = ['starter', 'single', 'defunct', 'xvfb-run', 'collector']
 else:
 	processes = ['starter', 'collector', 'enqueuer', 'defunct', 'emmiter', 'event_finisher', 'xvfb-run', 'inactive_single_process', 'single']
 
@@ -20,7 +20,8 @@ for pid in pids:
 		tst = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()
 
 		for filename in processes:
-			if filename in str(tst) and "-platform" in str(tst):
+			# if filename in str(tst) and "-platform" in str(tst) and "collector_per_day_standings" not in str(tst):
+			if filename in str(tst) and "-platform" in str(tst) and "collector_per_day_standings" not in str(tst):
 				os.kill(int(pid), signal.SIGTERM)
 
 	except IOError:  # proc has already terminated

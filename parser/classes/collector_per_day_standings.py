@@ -28,12 +28,13 @@ class Collector(QWebPage):
 	# define signal
 	newChanges = pyqtSignal(dict)
 
-	def __init__(self, parent=None, page_link=None, debug=None, logger=None):
+	def __init__(self, parent=None, page_link=None, debug=None, logger=None, day=None):
 		super(Collector, self).__init__(parent)
 
 		self._parent = parent
 		self.debug = debug
 		self.log = logger
+		self.day = day
 
 		self.EVENT = None
 
@@ -91,44 +92,41 @@ class Collector(QWebPage):
 	def read_page(self):
 
 		if self.first_load:
-			print("Lets GO")
+			print(self.day)
 
-			self.statistics = QTimer()
-			self.statistics.timeout.connect(self.match_statistics)
-			self.statistics.start(10000)
+			if self.redis.get("per_day_standings_parser"):
+				self.open_teams_standings()
 
-			if self.redis.get("restart_standings") and self.redis.get("restart_standings") == "True":
-				print("restart_standings")
-				print(self.redis.get("restart_standings"))
-				self.redis.set("restart_standings", False)
-				link = self.redis.get("s-link")
-				self._frame.load(QNetworkRequest(QUrl(link)))
-				QTimer().singleShot(2000, self.get_teams_standings)
-				self.first_load = False
+			QTimer().singleShot(3000, self.open_day)
+			self.first_load = False
 
-			elif self.redis.get("restart_team") and self.redis.get("restart_team") == "True":
-				print("restart_team")
-				print(self.redis.get("restart_team"))
-				self.redis.set("restart_team", False)
-				link = self.redis.get("t-link")
-				self._frame.load(QNetworkRequest(QUrl(link + "results")))
-				QTimer().singleShot(2000, self.parse_team)
-				self.first_load = False
+	def open_day(self):
+		print("open_day")
+		main = self._frame.findFirstElement("#fsbody")
+		if len(main.toPlainText()) > 20:
 
-			else:
-				print("OVDE SAM")
-				QTimer().singleShot(2000, self.open_country_menu)
+			# Otvaramo zeljeni datum (max 7 dana napred nazad od danasnjeg datuma)
+			finished_games = main.findAll(".ifmenu").at(0)
 
-				self.active = QTimer()
-				self.active.timeout.connect(self.leagues_active)
-				self.active.start(5000)
+			tmp_js = "set_calendar_date('{}')".format(self.day)
 
-				self.first_load = False
+			finished_games.evaluateJavaScript(tmp_js)
 
-	def leagues_active(self):
-		self.redis.set("leagues_active", True)
-		print("leagues_active")
-		self.redis.expire("leagues_active", 30)
+			QTimer().singleShot(3000, self.open_finished)
+		else:
+			self.reload_collector()
+
+	def open_finished(self):
+		print("open_finished")
+
+		main = self._frame.findFirstElement("#fsbody")
+
+		# Otvaramo tab zavrsene utakmice
+		finished_games = main.findAll(".ifmenu").at(0).findAll(".li2").at(0).findAll("a").at(0)
+		util.simulate_click(finished_games)
+
+		QTimer().singleShot(3000, self.open_country_menu)
+
 
 	def open_country_menu(self):
 		print("open_country_menu")
@@ -160,7 +158,7 @@ class Collector(QWebPage):
 		# Mora se raditi iz dva dela, zato sto je kod njih lista u dva diva iz dva dela
 		country_list = main.findAll(".menu.country-list").at(2).findAll("li")
 		country_list1 = main.findAll(".menu.country-list").at(3).findAll("li")
-		if self.redis.get("parse_leagues") != "True":
+		if self.redis.get("parse_leagues_per_day") != "True":
 			for i in range(1, len(country_list)):
 				if country_list.at(i).hasAttribute("id"):
 
@@ -179,8 +177,8 @@ class Collector(QWebPage):
 						# Uzimamo samo Bundesliga
 						if league.toPlainText().strip():
 							# if "cup" not in league.toPlainText().lower().strip():
-							self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
-							self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
+							self.redis.hset('per_day_leagues_{}'.format(country.toPlainText().lower().strip()), league.toPlainText().lower().replace(" ", "-"), "https://www.flashscore.com{}".format(league.attribute("href")))
+
 
 			for i in range(0, len(country_list1)):
 				if country_list1.at(i).hasAttribute("id"):
@@ -196,65 +194,74 @@ class Collector(QWebPage):
 					league_list = country_list1.at(i).findAll("ul").at(0).findAll("li")
 					for x in range(0, len(league_list)):
 						league = league_list.at(x).findAll("a").at(0)
-
 						# Uzimamo samo Bundesliga
 						if league.toPlainText().strip():
 							# if "cup" not in league.toPlainText().lower().strip():
-							self.redis.sadd('leagues_links', "https://www.flashscore.com{}".format(league.attribute("href")))
-							self.redis.sadd('leagues', league.toPlainText().lower().replace(" ", "-"))
+							self.redis.hset('per_day_leagues_{}'.format(country.toPlainText().lower().strip()), league.toPlainText().lower().replace(" ", "-"), "https://www.flashscore.com{}".format(league.attribute("href")))
+
 
 			# Posto smo gore izbacili "Other Competitions" moramo rucno dodati world_cup
-			self.redis.sadd('leagues_links', "https://www.flashscore.com/football/world/world-cup/")
-			self.redis.sadd('leagues', "world-cup")
 
-		self.redis.set("parse_leagues", True)
-		QTimer().singleShot(3000, self.open_leagues)
+			self.redis.hset('per_day_leagues_world', "world-cup", "https://www.flashscore.com/football/world/world-cup/")
+		self.redis.set("parse_leagues_per_day", True)
+		QTimer().singleShot(3000, self.parse)
 
 
-	def open_leagues(self):
+	def parse(self):
+		print("parse")
 
-		print("open_leagues")
-		league_links = self.redis.smembers('leagues_links')
+		if self.redis.get("per_day_standings_parser"):
+			self.open_teams_standings()
 
-		if self.redis.get("parse_teams") and self.redis.get("parse_teams") == "True":
-			team_links = self.redis.smembers('team_links')
+		main = self._frame.findFirstElement("#fsbody")
+		table = main.findAll("#fs").at(0).findAll(".table-main").at(0).findAll('table')
 
-			if len(team_links) == 0:
-				self.match_statistics()
-				sys.exit()
+		if len(table) != 0:
+			for i in range(len(table)):
+				row = table.at(i).findAll('thead').at(0).findAll("tr").at(0)
 
-			# OPEN TEAM LINK
-			for link in team_links:
-				self.redis.srem("team_links", link)
-				self.redis.set("t-link", link)
-				print(link+"results")
-				if link != "https://www.flashscore.com":
-					self._frame.load(QNetworkRequest(QUrl(link+"results")))
-					QTimer().singleShot(3000, self.parse_team)
-				else:
-					QTimer().singleShot(3500, self.open_leagues)
-				break
+				country_part = row.findAll(".country_part").at(0).toPlainText().strip().lower().replace(":", "")
+				tournament_part = row.findAll(".tournament_part").at(0).toPlainText().strip().lower().replace(" ", "-")
 
+				all_leagues = self.redis.hgetall("per_day_leagues_{}".format(country_part))
+				for league in all_leagues:
+					if league in tournament_part:
+						self.redis.sadd("per_day_leagues_links", self.redis.hget("per_day_leagues_{}".format(country_part), league))
+
+			self.redis.set("per_day_standings_parser", True)
+			QTimer().singleShot(5000, self.open_teams_standings)
 		else:
-			# Prvo otvaramo lige, kada dodjemo do kraja, setujemo parse_teams na True da bi ulazili u if iznad
-			if len(league_links) in [0, 1]:
-				self.redis.set("parse_teams", True)
+			if self.checker_team == 5:
+				print("RESTARTTTTTTTT !!!!!!!!!!!!!!!!!!! checker  " + str(self.checker_team))
+				self.reload_collector()
+			else:
+				self.checker_team += 1
+				QTimer().singleShot(1000, self.parse)
 
-			for link in league_links:
-				self.redis.srem("leagues_links", link)
-				self.redis.set("s-link", link)
-				# Izbacujemo kupove za sada, potrebni drugacije parsiranje :D
-				if "cup" in link.lower() and link.lower() != "https://www.flashscore.com/football/world/world-cup/" or "offs" in link.lower():
-					QTimer().singleShot(3000, self.open_leagues)
-					continue
+	def open_teams_standings(self):
+		print("\nopen_teams_standings\n")
+		leagues = self.redis.smembers('per_day_leagues_links')
 
-				self._frame.load(QNetworkRequest(QUrl(link)))
+		print(len(leagues))
+		if len(leagues) == 0:
+			self.redis.delete("per_day_standings_parser")
+			print("Nema vise")
+			time.sleep(300)
+			self.reload_collector()
 
-				QTimer().singleShot(3000, self.get_teams_standings)
+		for link in leagues:
+			print("USAO U LINK")
+			print(link)
+			self._frame.load(QNetworkRequest(QUrl(link)))
+			QTimer().singleShot(5000, self.get_teams_standings)
+			self.redis.srem('per_day_leagues_links', link)
+			break
 
-				break
+
 
 	def get_teams_standings(self):
+		print("\nget_teams_standings\n")
+
 
 		bubble = None
 		groups = None
@@ -277,6 +284,7 @@ class Collector(QWebPage):
 		except:
 			self.log.error("get team standings [1]")
 
+		print("Grupa", len(groups))
 		for i in range(len(groups)):
 			tr = groups.at(i).findAll("tr")
 			for x in range(len(tr)):
@@ -321,115 +329,33 @@ class Collector(QWebPage):
 
 		else:
 			if len(groups_draw):
+				print("000000000000")
 				self.redis.set("restart_standings", False)
-				QTimer().singleShot(1500, self.open_leagues)
+				QTimer().singleShot(1500, self.open_teams_standings)
 
 			elif len(groups) == 0:
 				if self.checker == 5:
+					print("1111111111111")
 					self.redis.set("restart_standings", True)
 					self.reload_collector()
 				else:
 					self.checker += 1
+					print("222222222")
 					QTimer().singleShot(1000, self.get_teams_standings)
 			else:
 				self.redis.set("restart_standings", False)
 				QTimer().singleShot(500, self.resourse_check)
-				QTimer().singleShot(1500, self.open_leagues)
+				QTimer().singleShot(1500, self.open_teams_standings)
 
-	def parse_team(self):
 
-		print("parse_team")
-		self.redis.set("restart_standings", False)
-		self.redis.set("restart_team", False)
-
-		country =None
-
-		main = self._frame.findFirstElement("#main")
-		try:
-			country = main.findAll(".tournament").at(0).findAll("a").at(1).toPlainText().strip()
-		except:
-			self.log.error("parse team [1]")
-
-		tr = main.findAll("#fs-results").at(0).findAll("tr")
-		team_name = main.findAll('.team-name').at(0).toPlainText().strip()
-
-		opened_team = self.redis.get("t-link").split("/")[4]
-		menu = main.findAll(".ifmenu").at(0).findAll("a").at(0).attribute("href")
-
-		if opened_team not in menu:
-			self.log.error("Zabo tim")
-			print("\n\nONAJ BAG KAD ZABODE TIM\n\n")
-			self.redis.set("restart_team", True)
-			self.reload_collector()
-
-		country_part = None
-		tournament_part = None
-
-		try:
-			if team_name is None or country is None:
-				if self.checker_team == 5:
-					self.redis.set("restart_team", True)
-					self.reload_collector()
-				else:
-					self.checker_team += 1
-					QTimer().singleShot(1000, self.parse_team)
-			else:
-				self.redis.sadd("teams_countries", "{}@{}".format(team_name, country))
-		except:
-			self.log.error("parse team [2]")
-
-		if len(tr) != 0:
-			for x in range(len(tr)):
-
-				row = tr.at(x)
-
-				if row.hasClass("league"):
-					country_part = row.findAll(".country_part").at(0).toPlainText().strip()
-					tournament_part = row.findAll(".tournament_part").at(0).toPlainText().strip()
-				else:
-					id = row.attribute("id").replace("g_1_", "")
-					time = row.findAll(".time").at(0).toPlainText().strip()
-					home = row.findAll(".team-home").at(0).toPlainText().strip()
-					away = row.findAll(".team-away").at(0).toPlainText().strip()
-					score = row.findAll(".score").at(0).toPlainText().strip().replace("\n", " ").replace(u'\xa0', u' ')
-					win_lose = row.findAll(".win_lose_icon").at(0).attribute("title").strip()
-
-					if team_name != None:
-						if "2016" not in time and "2015" not in time and "2014" not in time and "2013" not in time and "2012" not in time and "2011" not in time and "2010" not in time and "2009" not in time:
-							# event = time, " - ", home, " - ", away, " - ", score, " - ", win_lose, " - ", country_part, tournament_part, " - ", id
-							event = {"id":x, "sport":"Football", "time":time, "home":home, "away":away, "score":score, "win_lose":win_lose, "country":country, "country_part":country_part, "tournament_part":tournament_part, "flashscore_id":id}
-
-							###  OVDE JE PROBLEM
-							### PRIMER: U ENGLESKOJ PREMIJER LIGI, IGRAJU TIMOVI IZ WELSA
-							### ZATO NE MOZEMO KORISTITI "IF" DOLE ISPOD, ZA TE TIMOVE NECE PROCI UPIS
-
-							# if country.title().replace(":","").replace(" ", "") == country_part.title().replace(":","").replace(" ", ""):# and team_name == "Bayern Munich":
-							# tournament_list = ["australia&oceania"]
-							# if all(tournament not in country_part.lower().replace(":","").replace(" ", "") for tournament in tournament_list):
-							self.redis.hset("team-{}".format(team_name), x, json.dumps(event))
-
-			self.redis.sadd("team_names", team_name)
-
-			QTimer().singleShot(1500, self.resourse_check)
-			QTimer().singleShot(2500, self.open_leagues)
-		else:
-			no_match_found = main.findAll("#fs-results").at(0).toPlainText().strip()
-			if "No match found." not in no_match_found:
-				if self.checker_team == 5:
-					self.redis.set("restart_team", True)
-					self.reload_collector()
-				else:
-					self.checker_team += 1
-					QTimer().singleShot(1000, self.parse_team)
-			else:
-				print("NEMAAAAAAAAAAAAAAAA")
-				self.redis.sadd("team_names", team_name)
-				QTimer().singleShot(2500, self.open_leagues)
 
 	def match_statistics(self):
+		print("match_statistics")
 
 		team_names = self.redis.smembers("team_names")
 		for team in team_names:
+
+			# self.statistics.stop()
 			matches = self.redis.hgetall("team-{}".format(team))
 			if matches:
 				allready_running = None
@@ -446,24 +372,23 @@ class Collector(QWebPage):
 						continue
 
 				if not allready_running:
-					print(common.statistics_num)
+					print("PUSTAM")
 					for i in range(0, common.statistics_num):
 						cmd = 'python3 {}parser/classes/collector_statistics.py -platform minimal'.format(project_root_path)
 						# cmd = 'python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
-						# print(cmd)
 						subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 						time.sleep(2)
-						pass
+					sys.exit()
 			break
 
 
 	def resourse_check(self):
 
-		print('--   iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 1000000:
-			self.log.error('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+		print('!!!!!!!!!!!!!!!!!!!!!!iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 700000:
 			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+			print("Presao limit")
 			self.reload_collector()
 
 	def reload_collector(self):
@@ -471,10 +396,8 @@ class Collector(QWebPage):
 		for pid in pids:
 			try:
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
-				if "collector_leagues" in proces_name and '/bin/sh' not in proces_name:
-					print(proces_name[10:-2])
+				if "collector_per_day" in proces_name and '/bin/sh' not in proces_name:
 					relaunch_cmd = "python3 {}".format(proces_name[10:-2])
-					print(relaunch_cmd)
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()
 			except IOError:
@@ -483,10 +406,20 @@ class Collector(QWebPage):
 
 if __name__ == "__main__":
 
-	collector_log = util.parserLog('/var/log/sbp/flashscore/collector_leagues.log', 'flashscore-collector')
+	collector_log = util.parserLog('/var/log/sbp/flashscore/collector_per_day.log', 'flashscore-collector-per-day')
+
+	day = sys.argv[-1]
+
+	try:
+		day = int(day)
+	except:
+		day = 0
+
+	print(day)
+	# todo: if gui in sys.argv True
 	app = QApplication(sys.argv)
 	web = QWebView()
-	webpage = Collector(parent=web, page_link=common.live_link, debug=True, logger=collector_log)
+	webpage = Collector(parent=web, page_link=common.live_link, debug=True, logger=collector_log, day=day)
 	web.setPage(webpage)
 	web.setGeometry(780, 0, 1200, 768)
 	web.show()

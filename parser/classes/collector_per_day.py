@@ -148,17 +148,18 @@ class Collector(QWebPage):
 					score = row.findAll(".score").at(0).toPlainText().strip().replace("\n", " ").replace(u'\xa0', u' ')
 					win_lose = row.findAll(".win_lose_icon").at(0).attribute("title").strip()
 
-					if timer.lower() == "finished":
+					if timer.lower() in ["finished", "after pen.", "after et"]:
 						event = {"id": x, "sport": "Football", "time": time, "home": home, "away": away,
 						         "score": score, "win_lose": win_lose, "country": country,
 						         "country_part": country_part, "tournament_part": tournament_part,
 						         "flashscore_id": id}
 
-						tournament_list = ["world", "europe", "asia", "africa", "southamerica", "north&centralamerica", "australia&oceania"]
-						if all(tournament not in country_part.lower().replace(":", "").replace(" ", "") for tournament in tournament_list):
-							self.redis.hset("team-{}".format(home), x, json.dumps(event))
+						# sluzi za izbacivanje odredjenih liga ili zemalja
+						# tournament_list = ["world", "europe", "asia", "africa", "southamerica", "north&centralamerica", "australia&oceania"]
+						# if all(tournament not in country_part.lower().replace(":", "").replace(" ", "") for tournament in tournament_list):
+						self.redis.hset("team-{}".format(home), x, json.dumps(event))
 
-							self.redis.sadd("team_names", home)
+						self.redis.sadd("team_names", home)
 
 			QTimer().singleShot(5000, self.match_statistics)
 		else:
@@ -194,7 +195,7 @@ class Collector(QWebPage):
 					print("PUSTAM")
 					for i in range(0, common.statistics_num):
 						cmd = 'python3 {}parser/classes/collector_statistics.py -platform minimal'.format(project_root_path)
-						# cmd = 'xvfb-run -a python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
+						# cmd = 'python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
 						subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 						time.sleep(2)
 					sys.exit()
@@ -217,7 +218,6 @@ class Collector(QWebPage):
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_per_day" in proces_name and '/bin/sh' not in proces_name:
 					relaunch_cmd = "python3 {}".format(proces_name[10:-2])
-					# relaunch_cmd = "xvfb-run -a python3 {}".format(proces_name[10:-2])
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()
 			except IOError:
@@ -229,6 +229,13 @@ if __name__ == "__main__":
 	collector_log = util.parserLog('/var/log/sbp/flashscore/collector_per_day.log', 'flashscore-collector-per-day')
 
 	day = sys.argv[-1]
+
+	try:
+		day = int(day)
+	except:
+		day = 0
+
+	print(day)
 	# todo: if gui in sys.argv True
 	app = QApplication(sys.argv)
 	web = QWebView()

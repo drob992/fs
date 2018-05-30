@@ -1,25 +1,48 @@
 import utilities
 
-db = __connection = utilities.get_mysql_db('stats')
+db = __connection = utilities.get_mysql_db('events')
 
 
-def fetch(tbl_name, fields=None, where=None):
+def fetch(tbl_name, fields=None, where=None, to_json=None):
 	if fields:
 		fields = ','.join(fields)
 	else:
 		fields = '*'
-	
+
 	_where_tpl = ''
 	if where:
 		_where_tpl += 'where ' + where
-	
+
 	response = []
 	__cursor = __connection.cursor()
 	# print(("-------- select {} from {} {}".format(fields, tbl_name, _where_tpl)))
 	__cursor.execute("select {} from {} {}".format(fields, tbl_name, _where_tpl))
 	for row in __cursor.fetchall():
-		response.append(row)
+		if to_json:
+			#todo, izvuci iz scheme nazive kolona i ubaci u listu
+			response.append(dict(zip(fields, row)))
+		else:
+			response.append(row)
 	return response
+
+
+# def fetch(tbl_name, fields=None, where=None):
+# 	if fields:
+# 		fields = ','.join(fields)
+# 	else:
+# 		fields = '*'
+#
+# 	_where_tpl = ''
+# 	if where:
+# 		_where_tpl += 'where ' + where
+#
+# 	response = []
+# 	__cursor = __connection.cursor()
+# 	# print(("-------- select {} from {} {}".format(fields, tbl_name, _where_tpl)))
+# 	__cursor.execute("select {} from {} {}".format(fields, tbl_name, _where_tpl))
+# 	for row in __cursor.fetchall():
+# 		response.append(row)
+# 	return response
 
 
 def save(tbl_name, payload):

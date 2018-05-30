@@ -9,7 +9,7 @@ redis_master_host = 'localhost'
 
 
 redis_admin_host = 'localhost'
-redis_master_port = 6666
+redis_master_port = 6668
 redis_admin_port = 3108
 redis_pass = 'pr3mi3r'
 
