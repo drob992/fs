@@ -313,10 +313,10 @@ class Collector(QWebPage):
 
 				self.redis.hset("new-"+self.team, self.i, json.dumps(event))
 
-				# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 				# data = util.redis_emmit(self.redis, self.team, event, True)
 				# self.log.info('Collector emmit: {}'.format(data))
-				# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 				self.redis.hdel("team-{}".format(self.team), self.i)
 

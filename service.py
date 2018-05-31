@@ -119,7 +119,7 @@ def insert_standings(standings):
 		data['points'] = str(standings['points'])
 		data['year'] = str(standings['year'])
 		data['rank'] = str(standings['rank'])
-		data['rank_title'] = str(standings['rank_title'])
+		data['rank_title'] = str(standings['rank_title']).encode('utf-8')
 		data['rank_class'] = str(standings['rank_class'])
 		league_group = str(standings['league_group'])
 
@@ -173,7 +173,8 @@ def insert_statistics(data):
 def time_checker(time):
 	if ":" and " " in time:
 		time = time.split(" ")[0] + str(datetime.datetime.now().year)
-	elif str(datetime.datetime.now().year) not in time:
+	# elif str(datetime.datetime.now().year) not in time:
+	elif len(str(time)) < 7:
 		time = time + str(datetime.datetime.now().year)
 	return time
 
@@ -340,6 +341,8 @@ def standings():
 			try:
 				competition_event = eval(standing_row[competition])
 
+				# TODO: U liniji ispod stoji zakucan sport(competition organiser), potrebno slati to sa parsera
+				check_c_organiser = insert_competition_organisers("Football", country)
 				check_competition = insert_competitions(country, competition_event['league_name'])
 				check_competition_group = insert_competition_group(competition_event['league_group'])
 
@@ -348,11 +351,13 @@ def standings():
 
 				check_standing = insert_standings(competition_event)
 			except Exception as e:
-				check_standing = check_competition = check_competition_group = False
+				check_standing = check_competition = check_competition_group = check_c_organiser = False
 				print("Puklo standing", e, standing_row[competition])
 
-			if check_standing and check_competition and check_competition_group:
+			if check_standing and check_competition and check_competition_group and check_c_organiser:
 				rdb.hdel(standing, competition)
+
+		# sys.exit()
 
 def events():
 
@@ -394,6 +399,6 @@ if __name__ == '__main__':
 
 	team_countries()
 
-	# events()
+	events()
 
 	standings()
