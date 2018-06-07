@@ -135,7 +135,7 @@ def insert_standings(standings):
 			print("Success SAVING standings - competition - team " + standings['league_name'] + " -- " + standings['team'], "")
 
 	except Exception as e:
-		print("GRESKA - insert_standings - ",  e, "\n", data ,"\n")
+		print("GRESKA - insert_standings - ",  e, "\n", data, "\n")
 		return False
 
 	return True
@@ -326,7 +326,6 @@ def team_countries():
 
 def standings():
 	standings = rdb.keys("standings@*")
-	# standings = rdb.keys("standings@Southern Premier League@England")
 
 	for standing in standings:
 
@@ -347,7 +346,7 @@ def standings():
 				check_competition_group = insert_competition_group(competition_event['league_group'])
 
 				# ISPARSIRAJ PRVO SVE TIMOVE KOJI POSTOJE, NJIH UBACI, PA ONDA PARSIRAJ EVENTE I STATISTIKE
-				# insert_teams(competition["country"], competition['team'].replace("'", "\\'"))
+				# insert_teams(competition_event["country"], competition_event['team'].replace("'", "\\'"))
 
 				check_standing = insert_standings(competition_event)
 			except Exception as e:
@@ -397,8 +396,8 @@ def events():
 if __name__ == '__main__':
 	rdb = redis.StrictRedis(host='localhost', port=redis_master_port, decode_responses=True, password=redis_pass)
 
-	team_countries()
+	# team_countries()
 
 	events()
 
-	standings()
+	# standings()

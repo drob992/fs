@@ -98,13 +98,19 @@ class Collector(QWebPage):
 			self.statistics.start(10000)
 
 			if self.redis.get("restart_standings") and self.redis.get("restart_standings") == "True":
-				print("restart_standings")
-				print(self.redis.get("restart_standings"))
-				self.redis.set("restart_standings", False)
-				link = self.redis.get("s-link")
-				self._frame.load(QNetworkRequest(QUrl(link)))
-				QTimer().singleShot(2000, self.get_teams_standings)
-				self.first_load = False
+				if len(self.redis.smembers('leagues_links')) == 0:
+					print("NO MORE LEAGUES")
+					self.redis.set("restart_standings", False)
+					QTimer().singleShot(2000, self.open_leagues)
+					self.first_load = False
+				else:
+					print("restart_standings")
+					print(self.redis.get("restart_standings"))
+					self.redis.set("restart_standings", False)
+					link = self.redis.get("s-link")
+					self._frame.load(QNetworkRequest(QUrl(link)))
+					QTimer().singleShot(2000, self.get_teams_standings)
+					self.first_load = False
 
 			elif self.redis.get("restart_team") and self.redis.get("restart_team") == "True":
 				print("restart_team")
@@ -128,7 +134,7 @@ class Collector(QWebPage):
 	def leagues_active(self):
 		self.redis.set("leagues_active", True)
 		print("leagues_active")
-		self.redis.expire("leagues_active", 30)
+		self.redis.expire("leagues_active", 60)
 
 	def open_country_menu(self):
 		print("open_country_menu")
@@ -236,6 +242,7 @@ class Collector(QWebPage):
 				break
 
 		else:
+			print("Broj liga: " + str( len(league_links)))
 			# Prvo otvaramo lige, kada dodjemo do kraja, setujemo parse_teams na True da bi ulazili u if iznad
 			if len(league_links) in [0, 1]:
 				self.redis.set("parse_teams", True)
@@ -244,9 +251,9 @@ class Collector(QWebPage):
 				self.redis.srem("leagues_links", link)
 				self.redis.set("s-link", link)
 				# Izbacujemo kupove za sada, potrebni drugacije parsiranje :D
-				if "cup" in link.lower() and link.lower() != "https://www.flashscore.com/football/world/world-cup/" or "offs" in link.lower():
+				if link.lower() == "https://www.flashscore.com/football/world/world-cup/" or "/super-cup/" in link.lower():
 					QTimer().singleShot(3000, self.open_leagues)
-					continue
+					break
 
 				self._frame.load(QNetworkRequest(QUrl(link)))
 
@@ -282,6 +289,8 @@ class Collector(QWebPage):
 			for x in range(len(tr)):
 				if tr.at(x).hasClass("main"):
 					league_group = tr.at(x).findAll("th").at(1).toPlainText().strip()
+				elif tr.at(x).hasClass("dark"):
+					pass
 				else:
 					# print("*"*29)
 					# print("*"*8+"      {}      ".format(len(teams.at(x).findAll("td")))+"*"*8)

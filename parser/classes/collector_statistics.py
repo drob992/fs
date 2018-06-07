@@ -177,6 +177,7 @@ class Collector(QWebPage):
 			break
 
 	def parse_statistics(self):
+		print("parse_statistics")
 		summary = {}
 		statistics = {}
 		if self.summary_click:
