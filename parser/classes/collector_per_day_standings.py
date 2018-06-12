@@ -47,8 +47,6 @@ class Collector(QWebPage):
 		self._req.setRawHeader(b"Cache-Control", b"no-cache")
 		self._req.setRawHeader(b"Connection", b"keep-alive")
 		self._req.setRawHeader(b"User-Agent", common.uAgent)
-		# self._req.setRawHeader(b"Origin", b"https://www.flashscore.com/")
-		# self._req.setRawHeader(b"Referer", b"https://www.flashscore.com/")
 		self._req.setRawHeader(b"Upgrade-Insecure-Requests", b"1")
 		self._req.setRawHeader(b"Pragma", b"no-cache")
 		self._req.setRawHeader(b"X-Requested-With", b"XMLHttpRequest")
@@ -76,7 +74,6 @@ class Collector(QWebPage):
 		self._parent.setMouseTracking(True)
 		self._cursor_position = QCursor.pos()
 
-		# connect signals and slots
 		self.loadFinished.connect(self.read_page)
 
 		self.checker = 0
@@ -93,10 +90,8 @@ class Collector(QWebPage):
 
 		if self.first_load:
 			print(self.day)
-
 			if self.redis.get("per_day_standings_parser"):
 				self.open_teams_standings()
-
 			QTimer().singleShot(3000, self.open_day)
 			self.first_load = False
 
@@ -107,11 +102,8 @@ class Collector(QWebPage):
 
 			# Otvaramo zeljeni datum (max 7 dana napred nazad od danasnjeg datuma)
 			finished_games = main.findAll(".ifmenu").at(0)
-
 			tmp_js = "set_calendar_date('{}')".format(self.day)
-
 			finished_games.evaluateJavaScript(tmp_js)
-
 			QTimer().singleShot(3000, self.open_finished)
 		else:
 			self.reload_collector()
@@ -173,8 +165,6 @@ class Collector(QWebPage):
 					league_list = country_list.at(i).findAll("ul").at(0).findAll("li")
 					for x in range(0, len(league_list)):
 						league = league_list.at(x).findAll("a").at(0)
-
-						# Uzimamo samo Bundesliga
 						if league.toPlainText().strip():
 							# if "cup" not in league.toPlainText().lower().strip():
 							self.redis.hset('per_day_leagues_{}'.format(country.toPlainText().lower().strip()), league.toPlainText().lower().replace(" ", "-"), "https://www.flashscore.com{}".format(league.attribute("href")))
@@ -194,14 +184,11 @@ class Collector(QWebPage):
 					league_list = country_list1.at(i).findAll("ul").at(0).findAll("li")
 					for x in range(0, len(league_list)):
 						league = league_list.at(x).findAll("a").at(0)
-						# Uzimamo samo Bundesliga
 						if league.toPlainText().strip():
 							# if "cup" not in league.toPlainText().lower().strip():
 							self.redis.hset('per_day_leagues_{}'.format(country.toPlainText().lower().strip()), league.toPlainText().lower().replace(" ", "-"), "https://www.flashscore.com{}".format(league.attribute("href")))
 
-
 			# Posto smo gore izbacili "Other Competitions" moramo rucno dodati world_cup
-
 			self.redis.hset('per_day_leagues_world', "world-cup", "https://www.flashscore.com/football/world/world-cup/")
 		self.redis.set("parse_leagues_per_day", True)
 		QTimer().singleShot(3000, self.parse)
@@ -238,6 +225,7 @@ class Collector(QWebPage):
 				self.checker_team += 1
 				QTimer().singleShot(1000, self.parse)
 
+
 	def open_teams_standings(self):
 		print("\nopen_teams_standings\n")
 		leagues = self.redis.smembers('per_day_leagues_links')
@@ -258,10 +246,8 @@ class Collector(QWebPage):
 			break
 
 
-
 	def get_teams_standings(self):
 		print("\nget_teams_standings\n")
-
 
 		bubble = None
 		groups = None
@@ -269,10 +255,7 @@ class Collector(QWebPage):
 		league_name = None
 		country = None
 		year = None
-		rank = None
-		rank_title = "/"
 		league_group = "/"
-		rank_color = "/"
 		try:
 			main = self._frame.findFirstElement("#main")
 			groups = main.findAll(".stats-table-container").at(0).findAll("table")
@@ -291,9 +274,6 @@ class Collector(QWebPage):
 				if tr.at(x).hasClass("main"):
 					league_group = tr.at(x).findAll("th").at(1).toPlainText().strip()
 				else:
-					# print("*"*29)
-					# print("*"*8+"      {}      ".format(len(teams.at(x).findAll("td")))+"*"*8)
-					# print("*"*29)
 					rank = tr.at(x).findAll("td").at(0).toPlainText().strip()
 					rank_title = tr.at(x).findAll("td").at(0).attribute("title").strip()
 					rank_class = tr.at(x).findAll("td").at(0).attribute("class").replace("rank col_rank no", "").replace("col_sorted", "").strip()
@@ -348,45 +328,10 @@ class Collector(QWebPage):
 				QTimer().singleShot(1500, self.open_teams_standings)
 
 
-
-	def match_statistics(self):
-		print("match_statistics")
-
-		team_names = self.redis.smembers("team_names")
-		for team in team_names:
-
-			# self.statistics.stop()
-			matches = self.redis.hgetall("team-{}".format(team))
-			if matches:
-				allready_running = None
-				pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
-				for pid in pids:
-					try:
-						tst = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()
-
-						for filename in ["collector_statistics.py"]:
-							if filename in str(tst):
-								allready_running = True
-
-					except IOError:  # proc has already terminated
-						continue
-
-				if not allready_running:
-					print("PUSTAM")
-					for i in range(0, common.statistics_num):
-						cmd = 'python3 {}parser/classes/collector_statistics.py -platform minimal'.format(project_root_path)
-						# cmd = 'python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
-						subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
-						time.sleep(2)
-					sys.exit()
-			break
-
-
 	def resourse_check(self):
 
 		print('!!!!!!!!!!!!!!!!!!!!!!iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 700000:
-			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print("Presao limit")
 			self.reload_collector()

@@ -14,7 +14,7 @@ log_file_loc = '/var/log/sbp/'
 live_link = "https://www.flashscore.com/"
 
 
-statistics_num = 6
+statistics_num = 0
 
 europe = ["England"]
 # europe = ["France", "England", "Germany", "Spain"]

@@ -380,7 +380,11 @@ def events():
 			check_type = insert_types(competition_type)
 			check_c_organiser = insert_competition_organisers(competition_type, competition_organiser)
 			check_competitions = insert_competitions(competition_organiser, competition)
-
+			print(team)
+			print(team_data)
+			print(i)
+			print(data['statistics'])
+			print(data['summary'])
 			check_event = insert_events(data)
 
 			if check_type and check_c_organiser and check_competitions and check_event:
@@ -390,11 +394,11 @@ def events():
 
 			# check_upd_event = update_event(data['home'], data['away'], data['time'], data)
 
-			# sys.exit()
+			sys.exit()
 
 
 if __name__ == '__main__':
-	rdb = redis.StrictRedis(host='localhost', port=redis_master_port, decode_responses=True, password=redis_pass)
+	rdb = redis.StrictRedis(host='localhost', port=6667, decode_responses=True, password=redis_pass)
 
 	# team_countries()
 

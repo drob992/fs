@@ -136,7 +136,6 @@ class Collector(QWebPage):
 			time.sleep(5)
 			cmd = 'python3 {}parser/stop.py'.format(project_root_path)
 			print(cmd)
-			# cmd = 'xvfb-run -a python3 {}parser/stop.py'.format(project_root_path)
 			subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 			QTimer().singleShot(30000, self.match_statistics)
 
@@ -164,7 +163,7 @@ class Collector(QWebPage):
 					self.redis.expire("processed", 10)
 
 					match = json.loads(matches[i])
-
+					print("https://www.flashscore.com/match/{}/#match-summary".format(match['flashscore_id']))
 					self._frame.load(QNetworkRequest(QUrl("https://www.flashscore.com/match/{}/#match-summary".format(match['flashscore_id']))))
 
 					self.summary_click = True
@@ -193,7 +192,9 @@ class Collector(QWebPage):
 			try:
 				try:
 					main = self._frame.findFirstElement("#summary-content")
-					rows = main.findAll("tr")
+					# main = self._frame.findFirstElement(".detailMS")
+					rows = main.findAll("div")
+					print("ddfasdfasdfasdf")
 				except Exception as e:
 					self.log.error("\nNe mogu da nadjem stranicu\norder_num = ", self.order_num)
 					print("\nNe mogu da nadjem stranicu\norder_num = ", self.order_num)
@@ -210,71 +211,82 @@ class Collector(QWebPage):
 				summary["Penalties"] = {}
 
 				for i in range(len(rows)):
-					self.text_left = None
-					self.text_right = None
+					self.text_home = None
+					self.text_away = None
 					self.score = None
-					col = rows.at(i).findAll('td')
+					row = rows.at(i)
 
-					if len(col) == 1:
-						self.period = col.at(0).toPlainText().strip()
+					if row.hasClass("detailMS__incidentsHeader"):
+						self.period = row.findAll(".detailMS__headerText").at(0).toPlainText().strip().replace("\n ", "").replace("\xa0", "")
+						self.score = row.findAll(".detailMS__headerScore").at(0).toPlainText().strip().replace("\n ", "").replace("\xa0", "").replace(" - ", "-")
 						team1 = []
 						team2 = []
 
-					if len(col) == 3:
-						self.text_left = col.at(0).toPlainText().strip().replace("\xa0", "")
-						if self.text_left not in [" ", "", None]:
-							self.time = col.at(0).findAll(".time-box").at(0).toPlainText().strip().replace("\n ", "")
-							self.type = col.at(0).findAll(".icon").at(0).attribute("class").replace("icon ", "")
-							self.text_left = self.text_left.replace(self.time, "").replace(self.type, "").replace("\n ", "")
-							time[self.time] = self.type, self.text_left
+					if row.hasClass("detailMS__incidentRow"):
+
+						self.text_home = row.toPlainText().strip().replace("\xa0", "")
+						if row.hasClass("incidentRow--home"):
+							self.time = row.findAll(".time-box").at(0).toPlainText().strip().replace("\n ", "")
+							icon = row.findAll(".icon-box").at(0)
+							if icon.hasClass("y-card"):
+								self.type = "yellow card - {}".format(row.findAll(".participant-name").at(0).toPlainText().strip())
+							elif icon.hasClass("yr-card"):
+								self.type = "second yellow card / red card - {}".format(row.findAll(".participant-name").at(0).toPlainText().strip())
+							elif icon.hasClass("r-card"):
+								self.type = "red card - {}".format(row.findAll(".participant-name").at(0).toPlainText().strip())
+							elif icon.hasClass("soccer-ball"):
+								self.type = "goal - {}".format(row.findAll(".participant-name").at(0).toPlainText().strip())
+							elif icon.hasClass("soccer-ball-own"):
+								self.type = "own goal - {}".format(row.findAll(".participant-name").at(0).toPlainText().strip())
+							elif icon.hasClass("penalty-missed"):
+								self.type = "penalty-missed - {}".format(row.findAll(".participant-name").at(0).toPlainText().strip())
+							elif icon.hasClass("substitution-in"):
+								sub_in = row.findAll(".substitution-in-name").at(0).toPlainText().strip()
+								sub_out = row.findAll(".substitution-out-name").at(0).toPlainText().strip()
+								self.type = "substitution - {} ({})".format(sub_in, sub_out)
+							else:
+								self.type = self.text_home.replace(self.time, "").replace(self.type, "").replace("\n ", "")
+
+							time[self.time] = self.type
 							team1.append(time)
 							time = {}
 
-						self.text_right = col.at(2).toPlainText().strip().replace("\xa0", "")
-						if self.text_right not in [" ", "", None]:
-							self.time = col.at(2).findAll(".time-box").at(0).toPlainText().strip().replace("\n ", "")
-							self.type = col.at(2).findAll(".icon").at(0).attribute("class").replace("icon ", "")
-							self.text_right = self.text_right.replace(self.time, "").replace(self.type, "").replace("\n ", "")
-							time[self.time] = self.type, self.text_right
-							team2.append(time)
-							time = {}
+						self.text_away = row.toPlainText().strip().replace("\xa0", "")
+						if row.hasClass("incidentRow--away"):
+							self.time = row.findAll(".time-box").at(0).toPlainText().strip().replace("\n ", "")
+							icon = row.findAll(".icon-box").at(0)
+							if icon.hasClass("y-card"):
+								self.type = "yellow card - {}".format(row.findAll(".participant-name").at(0).toPlainText().strip())
+							elif icon.hasClass("yr-card"):
+								self.type = "second yellow card / red card - {}".format(row.findAll(".participant-name").at(0).toPlainText().strip())
+							elif icon.hasClass("r-card"):
+								self.type = "red card - {}".format(row.findAll(".participant-name").at(0).toPlainText().strip())
+							elif icon.hasClass("soccer-ball"):
+								self.type = "goal - {}".format(row.findAll(".participant-name").at(0).toPlainText().strip())
+							elif icon.hasClass("soccer-ball-own"):
+								self.type = "own goal - {}".format(row.findAll(".participant-name").at(0).toPlainText().strip())
+							elif icon.hasClass("penalty-missed"):
+								self.type = "penalty-missed - {}".format(row.findAll(".participant-name").at(0).toPlainText().strip())
+							elif icon.hasClass("substitution-in"):
+								sub_in = row.findAll(".substitution-in-name").at(0).toPlainText().strip()
+								sub_out = row.findAll(".substitution-out-name").at(0).toPlainText().strip()
+								self.type = "substitution - {} ({})".format(sub_in, sub_out)
+							else:
+								self.type = self.text_home.replace(self.time, "").replace(self.type, "").replace("\n ", "")
 
-						self.score = col.at(1).toPlainText().strip().replace(" ", "")
-
-					if len(col) == 2:
-						self.text_left = col.at(0).toPlainText().strip().replace("\xa0", "")
-						if self.text_left not in [" ", "", None]:
-							self.time = col.at(0).findAll(".time-box").at(0).toPlainText().strip().replace("\n ", "")
-							self.type = col.at(0).findAll(".icon").at(0).attribute("class").replace("icon ", "")
-							self.text_left = self.text_left.replace(self.time, "").replace(self.type, "").replace("\n ", "")
-							time[self.time] = self.type, self.text_left
-							team1.append(time)
-							time = {}
-
-						self.text_right = col.at(1).toPlainText().strip().replace("\xa0", "")
-						if self.text_right not in [" ", "", None]:
-							self.time = col.at(1).findAll(".time-box").at(0).toPlainText().strip().replace("\n ", "")
-							self.type = col.at(1).findAll(".icon").at(0).attribute("class").replace("icon ", "")
-							self.text_right = self.text_right.replace(self.time, "").replace(self.type, "").replace("\n ", "")
-							time[self.time] = self.type, self.text_right
+							time[self.time] = self.type
 							team2.append(time)
 							time = {}
 
 					if self.period not in [" ", "", None]:
-						print("period", self.period)
-						if self.text_left not in [" ", "", None]:
-							print("text_left", self.period)
+						if self.text_home not in [" ", "", None]:
 							summary[self.period]["team1"] = team1
 
-						if self.text_right not in [" ", "", None]:
-							print("text_right", self.period)
+						if self.text_away not in [" ", "", None]:
 							summary[self.period]["team2"] = team2
 
 						if self.score not in [" ", "", None]:
-							print("score", self.period)
-							print(self.score)
 							summary[self.period]["score"] = self.score
-
 				try:
 					try:
 						summary_btn = self._frame.findFirstElement("#a-match-statistics")
@@ -283,14 +295,13 @@ class Collector(QWebPage):
 						self.log.error("parse_statistics [1]", e)
 
 					main = self._frame.findFirstElement("#tab-statistics-0-statistic")
-					rows = main.findAll('tr')
+					rows = main.findAll('.statRow')
 
 					for i in range(len(rows)):
-						stats_name = rows.at(i).findAll('td').at(1).toPlainText().strip()
-						stats_team1 = rows.at(i).findAll('td').at(0).toPlainText().strip()
-						stats_team2 = rows.at(i).findAll('td').at(2).toPlainText().strip()
+						stats_team1 = rows.at(i).findAll('.statText--homeValue').at(0).toPlainText().strip()
+						stats_name = rows.at(i).findAll('.statText--titleValue').at(0).toPlainText().strip()
+						stats_team2 = rows.at(i).findAll('.statText--awayValue').at(0).toPlainText().strip()
 						statistics[stats_name] = {'team1': stats_team1, 'team2': stats_team2}
-						print(statistics[stats_name])
 				except Exception as e:
 					self.log.error("\nPotraga za statistikom nije uspela\n", e)
 					print("\nPotraga za statistikom nije uspela\n", e)
@@ -307,11 +318,14 @@ class Collector(QWebPage):
 			try:
 				event = json.loads(self.redis.hget("team-{}".format(self.team), self.i))
 
-				# self.redis.hset("old-"+self.team, self.i, json.dumps(event))
-
 				event["statistics"] = statistics
 				event["summary"] = summary
 
+				print("/////////////////////////////")
+				print(event["statistics"])
+				print()
+				print(event["summary"])
+				print("\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/")
 				self.redis.hset("new-"+self.team, self.i, json.dumps(event))
 
 				# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -333,9 +347,8 @@ class Collector(QWebPage):
 
 	def resourse_check(self):
 
-		# print('!!!!!!!!!!!!!!!!!!!!!!iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 600000:
-			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+		print('!!!!!!!!!!!!!!!!!!!!!!iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 700000:
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print("Presao limit\norder_num = ", self.order_num)
 			self.reload_collector()
@@ -347,7 +360,6 @@ class Collector(QWebPage):
 				proces_name = str(open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()).replace('\\x00', ' ')
 				if "collector_statistics" in proces_name and str(self.order_num) in proces_name and '/bin/sh' not in proces_name:
 					relaunch_cmd = 'python3 {}parser/classes/collector_statistics.py -platform minimal'.format(project_root_path)
-					# relaunch_cmd = "python3 collector_statistics.py {}".format(self.order_num)
 					subprocess.Popen(shlex.split(relaunch_cmd), stderr=None, stdout=None)
 					sys.exit()
 			except IOError:

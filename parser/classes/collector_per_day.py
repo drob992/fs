@@ -47,8 +47,6 @@ class Collector(QWebPage):
 		self._req.setRawHeader(b"Cache-Control", b"no-cache")
 		self._req.setRawHeader(b"Connection", b"keep-alive")
 		self._req.setRawHeader(b"User-Agent", common.uAgent)
-		# self._req.setRawHeader(b"Origin", b"https://www.flashscore.com/")
-		# self._req.setRawHeader(b"Referer", b"https://www.flashscore.com/")
 		self._req.setRawHeader(b"Upgrade-Insecure-Requests", b"1")
 		self._req.setRawHeader(b"Pragma", b"no-cache")
 		self._req.setRawHeader(b"X-Requested-With", b"XMLHttpRequest")
@@ -93,21 +91,18 @@ class Collector(QWebPage):
 
 		if self.first_load:
 			print(self.day)
-
 			QTimer().singleShot(3000, self.open_day)
 			self.first_load = False
 
 	def open_day(self):
+
 		main = self._frame.findFirstElement("#fsbody")
 		if len(main.toPlainText()) > 20:
 
 			# Otvaramo zeljeni datum (max 7 dana napred nazad od danasnjeg datuma)
 			finished_games = main.findAll(".ifmenu").at(0)
-
 			tmp_js = "set_calendar_date('{}')".format(self.day)
-
 			finished_games.evaluateJavaScript(tmp_js)
-
 			QTimer().singleShot(3000, self.open_finished)
 		else:
 			self.reload_collector()
@@ -175,7 +170,6 @@ class Collector(QWebPage):
 		team_names = self.redis.smembers("team_names")
 		for team in team_names:
 
-			# self.statistics.stop()
 			matches = self.redis.hgetall("team-{}".format(team))
 			if matches:
 				allready_running = None
@@ -195,7 +189,6 @@ class Collector(QWebPage):
 					print("PUSTAM")
 					for i in range(0, common.statistics_num):
 						cmd = 'python3 {}parser/classes/collector_statistics.py -platform minimal'.format(project_root_path)
-						# cmd = 'python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
 						subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 						time.sleep(2)
 					sys.exit()
@@ -203,10 +196,8 @@ class Collector(QWebPage):
 
 
 	def resourse_check(self):
-
 		print('!!!!!!!!!!!!!!!!!!!!!!iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 700000:
-			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print("Presao limit")
 			self.reload_collector()

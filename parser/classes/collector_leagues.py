@@ -46,8 +46,6 @@ class Collector(QWebPage):
 		self._req.setRawHeader(b"Cache-Control", b"no-cache")
 		self._req.setRawHeader(b"Connection", b"keep-alive")
 		self._req.setRawHeader(b"User-Agent", common.uAgent)
-		# self._req.setRawHeader(b"Origin", b"https://www.flashscore.com/")
-		# self._req.setRawHeader(b"Referer", b"https://www.flashscore.com/")
 		self._req.setRawHeader(b"Upgrade-Insecure-Requests", b"1")
 		self._req.setRawHeader(b"Pragma", b"no-cache")
 		self._req.setRawHeader(b"X-Requested-With", b"XMLHttpRequest")
@@ -230,6 +228,7 @@ class Collector(QWebPage):
 				sys.exit()
 
 			# OPEN TEAM LINK
+			print("\nBroj linkova: " + str(len(team_links)))
 			for link in team_links:
 				self.redis.srem("team_links", link)
 				self.redis.set("t-link", link)
@@ -257,7 +256,7 @@ class Collector(QWebPage):
 
 				self._frame.load(QNetworkRequest(QUrl(link)))
 
-				QTimer().singleShot(3000, self.get_teams_standings)
+				QTimer().singleShot(3500, self.get_teams_standings)
 
 				break
 
@@ -269,10 +268,7 @@ class Collector(QWebPage):
 		league_name = None
 		country = None
 		year = None
-		rank = None
-		rank_title = "/"
 		league_group = "/"
-		rank_color = "/"
 		try:
 			main = self._frame.findFirstElement("#main")
 			groups = main.findAll(".stats-table-container").at(0).findAll("table")
@@ -292,9 +288,6 @@ class Collector(QWebPage):
 				elif tr.at(x).hasClass("dark"):
 					pass
 				else:
-					# print("*"*29)
-					# print("*"*8+"      {}      ".format(len(teams.at(x).findAll("td")))+"*"*8)
-					# print("*"*29)
 					rank = tr.at(x).findAll("td").at(0).toPlainText().strip()
 					rank_title = tr.at(x).findAll("td").at(0).attribute("title").strip()
 					rank_class = tr.at(x).findAll("td").at(0).attribute("class").replace("rank col_rank no", "").replace("col_sorted", "").strip()
@@ -384,6 +377,7 @@ class Collector(QWebPage):
 					QTimer().singleShot(1000, self.parse_team)
 			else:
 				self.redis.sadd("teams_countries", "{}@{}".format(team_name, country))
+				print("ime tima: {} **** Zemlja: {}".format(team_name, country))
 		except:
 			self.log.error("parse team [2]")
 
@@ -405,12 +399,7 @@ class Collector(QWebPage):
 
 					if team_name != None:
 						if "2016" not in time and "2015" not in time and "2014" not in time and "2013" not in time and "2012" not in time and "2011" not in time and "2010" not in time and "2009" not in time:
-							# event = time, " - ", home, " - ", away, " - ", score, " - ", win_lose, " - ", country_part, tournament_part, " - ", id
 							event = {"id":x, "sport":"Football", "time":time, "home":home, "away":away, "score":score, "win_lose":win_lose, "country":country, "country_part":country_part, "tournament_part":tournament_part, "flashscore_id":id}
-
-							###  OVDE JE PROBLEM
-							### PRIMER: U ENGLESKOJ PREMIJER LIGI, IGRAJU TIMOVI IZ WELSA
-							### ZATO NE MOZEMO KORISTITI "IF" DOLE ISPOD, ZA TE TIMOVE NECE PROCI UPIS
 
 							# if country.title().replace(":","").replace(" ", "") == country_part.title().replace(":","").replace(" ", ""):# and team_name == "Bayern Munich":
 							# tournament_list = ["australia&oceania"]
@@ -458,7 +447,6 @@ class Collector(QWebPage):
 					print(common.statistics_num)
 					for i in range(0, common.statistics_num):
 						cmd = 'python3 {}parser/classes/collector_statistics.py -platform minimal'.format(project_root_path)
-						# cmd = 'python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
 						# print(cmd)
 						subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 						time.sleep(1)
@@ -469,11 +457,11 @@ class Collector(QWebPage):
 	def resourse_check(self):
 
 		print('--   iskorisceno memorije: %s (kb)   --    ' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 1000000:
+		if resource.getrusage(resource.RUSAGE_SELF).ru_maxrss >= 800000:
 			self.log.error('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-			# self.log.info('RESET kolektora - iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			print('iskorisceno memorije: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 			self.reload_collector()
+
 
 	def reload_collector(self):
 		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
