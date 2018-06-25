@@ -93,7 +93,7 @@ class Collector(QWebPage):
 
 			self.statistics = QTimer()
 			self.statistics.timeout.connect(self.match_statistics)
-			self.statistics.start(10000)
+			self.statistics.start(8000)
 
 			if self.redis.get("restart_standings") and self.redis.get("restart_standings") == "True":
 				if len(self.redis.smembers('leagues_links')) == 0:

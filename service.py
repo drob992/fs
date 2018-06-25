@@ -398,10 +398,10 @@ def events():
 
 
 if __name__ == '__main__':
-	rdb = redis.StrictRedis(host='localhost', port=6667, decode_responses=True, password=redis_pass)
+	rdb = redis.StrictRedis(host='localhost', port=6668, decode_responses=True, password=redis_pass)
 
 	# team_countries()
 
-	events()
+	# events()
 
-	# standings()
+	standings()

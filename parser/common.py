@@ -14,11 +14,11 @@ log_file_loc = '/var/log/sbp/'
 live_link = "https://www.flashscore.com/"
 
 
-statistics_num = 0
+statistics_num = 6
 
-europe = ["England"]
+# europe = ["England"]
 # europe = ["France", "England", "Germany", "Spain"]
-# europe = ["France", "England", "Germany", "Spain", "Turkey", "Italy", "Portugal", "Belgium", "Hungary", "Russia", "Iceland", "Northern Ireland", "Ireland", "Czech Republic", "Albania", "Romania", "Wales", "Slovakia", "Ukraine", "Croatia", "Sweden", "Austria", "Poland"]
+europe = ["France", "England", "Germany", "Spain", "Turkey", "Italy", "Portugal", "Belgium", "Hungary", "Russia", "Iceland", "Northern Ireland", "Ireland", "Czech Republic", "Albania", "Romania", "Wales", "Slovakia", "Ukraine", "Croatia", "Sweden", "Austria", "Poland"]
 
 master_servers = ["master", "stefan-desktop", "www-desktop"]
 node_servers = ["premier", "parser2", "igor-desktop", "www-desktop"]

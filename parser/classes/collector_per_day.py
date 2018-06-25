@@ -191,7 +191,7 @@ class Collector(QWebPage):
 						cmd = 'python3 {}parser/classes/collector_statistics.py -platform minimal'.format(project_root_path)
 						subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 						time.sleep(2)
-					sys.exit()
+				sys.exit()
 			break
 
 
