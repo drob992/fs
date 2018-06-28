@@ -7,7 +7,7 @@ LOG_DIR = '/var/log/sbp/flashscore/'
 project_root_path = '/home/parser/work/flashscore/'
 
 redis_admin_host = '52.17.73.0'
-redis_master_host = '188.93.124.15'
+redis_master_host = '188.93.125.222'
 redis_admin_port = 3108
 redis_master_port = 6668
 redis_pass = 'pr3mi3r'

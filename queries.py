@@ -19,39 +19,30 @@ def fetch(tbl_name, fields=None, where=None, to_json=None):
 	__cursor.execute("select {} from {} {}".format(fields, tbl_name, _where_tpl))
 	for row in __cursor.fetchall():
 		if to_json:
-			#todo, izvuci iz scheme nazive kolona i ubaci u listu
 			response.append(dict(zip(fields, row)))
 		else:
 			response.append(row)
 	return response
 
 
-# def fetch(tbl_name, fields=None, where=None):
-# 	if fields:
-# 		fields = ','.join(fields)
-# 	else:
-# 		fields = '*'
-#
-# 	_where_tpl = ''
-# 	if where:
-# 		_where_tpl += 'where ' + where
-#
-# 	response = []
-# 	__cursor = __connection.cursor()
-# 	# print(("-------- select {} from {} {}".format(fields, tbl_name, _where_tpl)))
-# 	__cursor.execute("select {} from {} {}".format(fields, tbl_name, _where_tpl))
-# 	for row in __cursor.fetchall():
-# 		response.append(row)
-# 	return response
+# Double quote save koristimo za standings zato sto oni sadrze imena liga koje imaju apostrofe i druge spec. karaktere
+def save2_dq(tbl_name, payload):
+	__cursor = __connection.cursor()
+	# print("-------- insert into {}({}) values({})".format(tbl_name, ','.join(payload.keys()), ','.join(map(utilities.stringify_dq, payload.values()))))
+	__cursor.execute("""insert into {}({}) values({})""".format(tbl_name, ','.join(payload.keys()), ','.join(map(utilities.stringify_dq, payload.values()))))
+	__connection.commit()
 
+	__cursor.execute('''select * from {} order by id desc limit 1'''.format(tbl_name))
+
+	return __cursor.fetchone()
 
 def save(tbl_name, payload):
 	__cursor = __connection.cursor()
 	# print("-------- insert into {}({}) values({})".format(tbl_name, ','.join(payload.keys()), ','.join(map(utilities.stringify, payload.values()))))
-	__cursor.execute("insert into {}({}) values({})".format(tbl_name, ','.join(payload.keys()), ','.join(map(utilities.stringify, payload.values()))))
+	__cursor.execute('''insert into {}({}) values({})'''.format(tbl_name, ','.join(payload.keys()), ','.join(map(utilities.stringify, payload.values()))))
 	__connection.commit()
 
-	__cursor.execute("select * from {} order by id desc limit 1".format(tbl_name))
+	__cursor.execute('''select * from {} order by id desc limit 1'''.format(tbl_name))
 
 	return __cursor.fetchone()
 

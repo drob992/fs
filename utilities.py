@@ -7,6 +7,8 @@ _DB_USE_UNICODE = False
 _DB_CHARSET = 'utf8'
 
 __mysql = {}
+
+
 def get_mysql_db(db_name, host=_DB_HOST, user=_DB_USERNAME, passwd=_DB_PASSWORD, use_unicode=_DB_USE_UNICODE, charset=_DB_CHARSET):
 	global __mysql
 	
@@ -32,4 +34,8 @@ def get_mysql_db(db_name, host=_DB_HOST, user=_DB_USERNAME, passwd=_DB_PASSWORD,
 
 
 def stringify(item):
+	return "'%s'" % item
+
+
+def stringify_dq(item):
 	return '"%s"' % item
