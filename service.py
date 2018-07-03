@@ -18,6 +18,7 @@ def team_strip(team):
 def score_parse(score):
 
 	score = str(score).replace(" : ", ":")
+	score = str(score).replace(" - ", ":")
 
 	if "(" in score:
 		score_split = score.split(" ")
@@ -35,7 +36,8 @@ def performance_parse(performance, score):
 
 	performance = str(performance)
 
-	if performance == "Win" or performance == "Loss" or performance == "Draw":
+	# Ovde spada i Win i Loss i Draw i oni koji nemaju poslati performance
+	if performance not in ["Draw/Win", "Draw/Loss", "Loss/Draw", "Win/Draw"]:
 		if score["t1_score"] > score["t2_score"]:
 			return {"t1_performance": "Win", "t2_performance": "Loss"}
 		elif score["t1_score"] < score["t2_score"]:
@@ -411,7 +413,7 @@ def standings():
 				check_competition_group = insert_competition_group(competition_event['league_group'])
 
 				# ISPARSIRAJ PRVO SVE TIMOVE KOJI POSTOJE, NJIH UBACI, PA ONDA PARSIRAJ EVENTE I STATISTIKE
-				# insert_teams(competition_event["country"], competition_event['team'].replace("'", "\\'"))
+				# insert_teams(competition_event["country"], team_strip(competition_event['team'].replace("'", "\\'")))
 
 				check_standing = insert_standings(competition_event)
 			except Exception as e:
