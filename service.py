@@ -196,6 +196,12 @@ def insert_standings(standings):
 
 def insert_summary(data):
 	try:
+		data['first_half'] = data['1st Half']
+		data['second_half'] = data['2nd Half']
+
+		data.pop("1st Half", None)
+		data.pop("2nd Half", None)
+		
 		summary={}
 		for i in data:
 			summary["{}".format(i.lower().replace(" ", "_"))] = json.dumps(data[i]).replace("'","")
