@@ -19,7 +19,7 @@ sys.path.insert(0, '../')
 import util
 from config import *
 import common
-
+from dateutil import parser
 
 class Collector(QWebPage):
 
@@ -137,7 +137,9 @@ class Collector(QWebPage):
 				else:
 					timer = row.findAll(".timer").at(0).toPlainText().strip()
 					id = row.attribute("id").replace("g_1_", "")
-					time = self._frame.findFirstElement("#tzactual").toPlainText().strip().split(" ")[0]
+
+					time = str(datetime.datetime.now().date() + datetime.timedelta(days=self.day))
+
 					home = row.findAll(".team-home").at(0).toPlainText().strip()
 					away = row.findAll(".team-away").at(0).toPlainText().strip()
 					score = row.findAll(".score").at(0).toPlainText().strip().replace("\n", " ").replace(u'\xa0', u' ')
