@@ -26,7 +26,7 @@ def check_statistics_activity():
 
     if common.statistics_num - num != 0:
         for i in range(common.statistics_num - num):
-            cmd = 'python3 {}parser/classes/collector_statistics.py'.format(project_root_path)
+            cmd = 'python3 {}parser/classes/collector_statistics.py -platform minimal'.format(project_root_path)
             # cmd = 'xvfb-run -a python3 {}parser/classes/collector_statistics.py ({})'.format(project_root_path, i)
             subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
 
