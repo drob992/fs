@@ -133,7 +133,8 @@ class Collector(QWebPage):
 		team_names = self.redis.smembers("team_names")
 		print(len(team_names))
 		if len(team_names) == 0:
-			time.sleep(5)
+			time.sleep(10)
+			self.redis.lpush("pushStats", True)
 			cmd = 'python3 {}parser/stop.py'.format(project_root_path)
 			print(cmd)
 			subprocess.Popen(shlex.split(cmd), stderr=None, stdout=None)
