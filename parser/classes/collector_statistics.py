@@ -38,7 +38,7 @@ class Collector(QWebPage):
 
 		self.EVENT = None
 
-		self.redis = redis.StrictRedis(host=redis_master_host, port=redis_master_port, decode_responses=True, password=redis_pass)
+		self.redis = redis.StrictRedis("localhost", decode_responses=True)
 
 		self._url = QUrl(page_link)
 		self._req = QNetworkRequest(self._url)
@@ -149,6 +149,7 @@ class Collector(QWebPage):
 
 			if len(matches) == 0 or team in ["", " ", None]:
 				try:
+					print("Nema vise, brisemo")
 					self.redis.srem("team_names", team)
 					continue
 				except:
