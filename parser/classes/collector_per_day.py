@@ -92,13 +92,17 @@ class Collector(QWebPage):
 
 		if self.first_load:
 			print(self.day)
+			print("!!!!!!!!!!!!")
 			QTimer().singleShot(3000, self.open_day)
 			self.first_load = False
+			print("read_page")
 
 	def open_day(self):
+		print("open_day")
 
 		main = self._frame.findFirstElement("#fsbody")
 		if len(main.toPlainText()) > 20:
+			print("set_calendar_date")
 
 			# Otvaramo zeljeni datum (max 7 dana napred nazad od danasnjeg datuma)
 			finished_games = main.findAll(".ifmenu").at(0)
@@ -106,9 +110,11 @@ class Collector(QWebPage):
 			finished_games.evaluateJavaScript(tmp_js)
 			QTimer().singleShot(3000, self.open_finished)
 		else:
+			print("reload_collector")
 			self.reload_collector()
 
 	def open_finished(self):
+		print("open_finished")
 
 		main = self._frame.findFirstElement("#fsbody")
 
@@ -119,6 +125,7 @@ class Collector(QWebPage):
 		QTimer().singleShot(3000, self.parse)
 
 	def parse(self):
+		print("parse")
 
 		main = self._frame.findFirstElement("#fsbody")
 		tr = main.findAll("#fs").at(0).findAll(".table-main").at(0).findAll("tr")
